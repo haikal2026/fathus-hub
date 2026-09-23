@@ -11,11 +11,17 @@ const MENU_ITEMS = [
   { id: 'kontak', label: 'Kontak' },
 ];
 
-export default function Header({ currentPage, onNavigate }) {
+export default function Header({
+  currentPage,
+  onNavigate,
+  user,
+  profile,
+  onLogout,
+}) {
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200">
       <div className="mx-auto max-w-[1400px] px-4 lg:px-6 h-16 flex items-center justify-between gap-4">
-        {/* Logo + Nama Sekolah */}
+        {/* Logo */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-[#0F4C81] flex items-center justify-center shadow-sm">
             <span className="text-white text-lg font-extrabold">MA</span>
@@ -30,7 +36,7 @@ export default function Header({ currentPage, onNavigate }) {
           </div>
         </div>
 
-        {/* Menu Desktop */}
+        {/* Menu */}
         <nav className="hidden xl:flex items-center gap-1">
           {MENU_ITEMS.map((item) => (
             <button
@@ -47,7 +53,7 @@ export default function Header({ currentPage, onNavigate }) {
           ))}
         </nav>
 
-        {/* Search + Menu Mobile */}
+        {/* Search + Auth */}
         <div className="flex items-center gap-2">
           <div className="hidden md:flex items-center bg-slate-50 border border-slate-200 rounded-full px-3 h-9 w-[200px]">
             <Search className="w-4 h-4 text-slate-400" />
@@ -56,6 +62,49 @@ export default function Header({ currentPage, onNavigate }) {
               className="bg-transparent outline-none ml-2 text-[13px] w-full"
             />
           </div>
+
+          {/* Tampilkan user info + tombol Keluar jika sudah login */}
+          {user && profile ? (
+  <div className="flex items-center gap-2">
+    <button
+      onClick={() => onNavigate('dashboard')}
+      className="hidden md:flex items-center gap-2 h-9 px-3 rounded-full bg-slate-50 border border-slate-200 hover:border-[#0F4C81] transition text-left"
+      title="Buka Dashboard"
+    >
+      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#0F4C81] to-[#1E3A8A] flex items-center justify-center text-white text-[11px] font-extrabold">
+        {profile.nama?.charAt(0)?.toUpperCase() ?? '?'}
+      </div>
+      <div className="leading-none">
+        <div className="text-[12px] font-bold text-slate-800">
+          {profile.nama}
+        </div>
+        <div className="text-[10px] text-slate-500 capitalize">
+          {profile.role}
+        </div>
+      </div>
+    </button>
+    <button
+      onClick={() => onNavigate('dashboard')}
+      className="h-9 px-3 rounded-full bg-[#0F4C81] text-white text-[12px] font-bold hover:bg-[#1E3A8A] transition"
+    >
+      Dashboard
+    </button>
+    <button
+      onClick={onLogout}
+      className="h-9 px-4 rounded-full bg-red-50 border border-red-100 text-red-600 text-[12px] font-bold hover:bg-red-100 transition"
+    >
+      Keluar
+    </button>
+  </div>
+) : (
+            <button
+              onClick={() => onNavigate('login')}
+              className="h-9 px-4 rounded-full bg-[#0F4C81] hover:bg-[#1E3A8A] text-white text-[12px] font-bold transition"
+            >
+              Masuk
+            </button>
+          )}
+
           <button className="xl:hidden w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
             <Menu className="w-5 h-5" />
           </button>
