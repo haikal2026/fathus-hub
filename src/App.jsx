@@ -14,6 +14,7 @@ import DashboardAdmin from './pages/DashboardAdmin';
 import DashboardGuru from './pages/DashboardGuru';
 import DashboardSiswa from './pages/DashboardSiswa';
 import KelolaSiswa from './pages/KelolaSiswa';
+import KelolaGuru from './pages/KelolaGuru';
 
 function App() {
   const [page, setPage] = useState('beranda');
@@ -56,6 +57,28 @@ function App() {
           onLogout={logout}
         />
         <KelolaSiswa onNavigate={setPage} />
+      </div>
+    );
+  }
+
+    // === GUARD 4: Halaman kelola-guru (hanya admin) ===
+  if (page === 'kelola-guru') {
+    if (!user) {
+      return <Login onSuccess={() => setPage('kelola-guru')} />;
+    }
+    if (!profile) {
+      return <LoadingProfile />;
+    }
+    return (
+      <div className="min-h-screen bg-[#F8FAFC]">
+        <Header
+          currentPage="kelola-guru"
+          onNavigate={setPage}
+          user={user}
+          profile={profile}
+          onLogout={logout}
+        />
+        <KelolaGuru onNavigate={setPage} />
       </div>
     );
   }
