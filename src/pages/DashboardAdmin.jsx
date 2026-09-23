@@ -154,11 +154,12 @@ export default function DashboardAdmin({ onNavigate }) {
               icon={<GraduationCap className="w-5 h-5" />}
               label="Kelola Guru"
               onClick={() => onNavigate('kelola-guru')}
-            />
+            />  
+
             <QuickButton
               icon={<Megaphone className="w-5 h-5" />}
               label="Pengumuman"
-              onClick={() => alert('Segera hadir di sesi berikutnya!')}
+              onClick={() => onNavigate('kelola-pengumuman')}
             />
             <QuickButton
               icon={<BookOpen className="w-5 h-5" />}

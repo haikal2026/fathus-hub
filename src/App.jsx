@@ -15,6 +15,7 @@ import DashboardGuru from './pages/DashboardGuru';
 import DashboardSiswa from './pages/DashboardSiswa';
 import KelolaSiswa from './pages/KelolaSiswa';
 import KelolaGuru from './pages/KelolaGuru';
+import KelolaPengumuman from './pages/KelolaPengumuman';
 
 function App() {
   const [page, setPage] = useState('beranda');
@@ -79,6 +80,28 @@ function App() {
           onLogout={logout}
         />
         <KelolaGuru onNavigate={setPage} />
+      </div>
+    );
+  }
+
+  // === GUARD 5: Halaman kelola-pengumuman (hanya admin) ===
+  if (page === 'kelola-pengumuman') {
+    if (!user) {
+      return <Login onSuccess={() => setPage('kelola-pengumuman')} />;
+    }
+    if (!profile) {
+      return <LoadingProfile />;
+    }
+    return (
+      <div className="min-h-screen bg-[#F8FAFC]">
+        <Header
+          currentPage="kelola-pengumuman"
+          onNavigate={setPage}
+          user={user}
+          profile={profile}
+          onLogout={logout}
+        />
+        <KelolaPengumuman onNavigate={setPage} />
       </div>
     );
   }

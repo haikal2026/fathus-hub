@@ -1,4 +1,59 @@
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
+
 export default function Beranda({ onNavigate }) {
+  const [pengumumanList, setPengumumanList] = useState([]);
+  const [loadingPengumuman, setLoadingPengumuman] = useState(true);
+
+  const [stats, setStats] = useState({ siswa: 0, guru: 0, ekskul: 3 });
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    async function fetchPengumuman() {
+      const { data, error } = await supabase
+        .from('pengumuman')
+        .select('*')
+        .order('penting', { ascending: false })
+        .order('tanggal', { ascending: false })
+        .limit(3);
+
+      if (!error && data) setPengumumanList(data);
+      setLoadingPengumuman(false);
+    }
+
+    async function fetchStats() {
+      const { count: siswaCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'siswa');
+
+      const { count: guruCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'guru');
+
+      setStats({
+        siswa: siswaCount ?? 0,
+        guru: guruCount ?? 0,
+        ekskul: 3,
+      });
+      setLoadingStats(false);
+    }
+
+    fetchPengumuman();
+    fetchStats();
+  }, []);
+
+  function formatTanggal(dateStr) {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    const bulan = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+    ];
+    return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
   return (
     <div className="p-4 lg:p-6 space-y-6 max-w-[1400px] mx-auto">
       {/* ============ HERO SECTION ============ */}
@@ -101,13 +156,13 @@ export default function Beranda({ onNavigate }) {
             AKTIF
           </div>
           <div className="mt-3 text-[32px] font-extrabold leading-none relative z-10">
-            163
+            {loadingStats ? '...' : stats.siswa}
           </div>
           <div className="mt-1 text-[13px] font-bold relative z-10">
             Siswa Aktif
           </div>
           <div className="mt-1 text-[11px] text-white/70 relative z-10">
-            70 Putra • 93 Putri
+            Putra & Putri
           </div>
         </div>
 
@@ -116,7 +171,7 @@ export default function Beranda({ onNavigate }) {
             TENDIK
           </div>
           <div className="mt-3 text-[32px] font-extrabold leading-none text-[#0F4C81]">
-            15
+            {loadingStats ? '...' : stats.guru}
           </div>
           <div className="mt-1 text-[13px] font-bold text-slate-800">
             Guru
@@ -132,7 +187,7 @@ export default function Beranda({ onNavigate }) {
             3 UNIT
           </div>
           <div className="mt-3 text-[32px] font-extrabold leading-none relative z-10">
-            3
+            {stats.ekskul}
           </div>
           <div className="mt-1 text-[13px] font-bold relative z-10">
             Ekstrakurikuler
@@ -167,55 +222,50 @@ export default function Beranda({ onNavigate }) {
             </button>
           </div>
 
-          {[
-            {
-              tgl: "10 Sept 2026",
-              kategori: "Akademik",
-              judul: "Pelaksanaan Ujian Tengah Semester Ganjil TP 2026/2027",
-              penting: true,
-            },
-            {
-              tgl: "09 Sept 2026",
-              kategori: "Kesiswaan",
-              judul: "Pendaftaran Lomba MTQ Tingkat Kabupaten Dibuka",
-              penting: false,
-            },
-            {
-              tgl: "08 Sept 2026",
-              kategori: "Umum",
-              judul: "Libur Maulid Nabi Muhammad SAW 1448 H",
-              penting: true,
-            },
-          ].map((item, i) => (
-            <div
-              key={i}
-              className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 hover:shadow-md transition"
-            >
-              <div
-                className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-[20px] ${
-                  item.penting ? "bg-amber-100" : "bg-blue-50"
-                }`}
-              >
-                📢
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100">
-                    {item.kategori}
-                  </span>
-                  <span className="text-[11px] text-slate-500">{item.tgl}</span>
-                  {item.penting && (
-                    <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">
-                      PENTING
-                    </span>
-                  )}
-                </div>
-                <div className="mt-1 text-[13px] font-bold leading-snug text-slate-800">
-                  {item.judul}
-                </div>
-              </div>
+          {loadingPengumuman ? (
+            <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center">
+              <div className="animate-spin w-8 h-8 border-4 border-[#0F4C81] border-t-transparent rounded-full mx-auto mb-3" />
+              <p className="text-slate-500 text-xs">Memuat pengumuman...</p>
             </div>
-          ))}
+          ) : pengumumanList.length === 0 ? (
+            <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center">
+              <div className="text-[32px] mb-2">📢</div>
+              <p className="text-slate-500 text-xs">Belum ada pengumuman terbaru.</p>
+            </div>
+          ) : (
+            pengumumanList.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 hover:shadow-md transition"
+              >
+                <div
+                  className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-[20px] ${
+                    item.penting ? "bg-amber-100" : "bg-blue-50"
+                  }`}
+                >
+                  📢
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100">
+                      {item.kategori}
+                    </span>
+                    <span className="text-[11px] text-slate-500">
+                      {formatTanggal(item.tanggal)}
+                    </span>
+                    {item.penting && (
+                      <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">
+                        PENTING
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-1 text-[13px] font-bold leading-snug text-slate-800">
+                    {item.judul}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
 
           <div className="flex items-center justify-between pt-2">
             <h3 className="font-extrabold text-[16px] text-slate-800">
