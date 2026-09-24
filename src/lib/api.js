@@ -31,11 +31,30 @@ export async function createUser(payload) {
 }
 
 /**
- * Hapus user (siswa/guru) — via Edge Function juga
- * (untuk sementara, kita hapus dari profiles saja)
+ * Panggil Edge Function untuk hapus user dari auth.users
+ * (dan otomatis dari profiles karena CASCADE)
+ * Hanya admin yang bisa.
  */
-export async function deleteProfile(userId) {
-  const { error } = await supabase.from('profiles').delete().eq('id', userId);
-  if (error) throw error;
-  return true;
+export async function deleteUser(userId) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) throw new Error('Tidak ada session. Silakan login ulang.');
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/delete-user`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      apikey: SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ userId }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'Gagal menghapus user');
+  }
+  return data;
 }

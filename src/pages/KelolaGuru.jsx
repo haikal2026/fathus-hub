@@ -10,7 +10,7 @@ import {
   Save,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { createUser } from '../lib/api';
+import { createUser, deleteUser } from '../lib/api';
 
 export default function KelolaGuru({ onNavigate }) {
   const [guruList, setGuruList] = useState([]);
@@ -46,18 +46,15 @@ export default function KelolaGuru({ onNavigate }) {
   });
 
   async function handleDelete(guru) {
-    if (!confirm(`Yakin hapus guru "${guru.nama}"?`)) return;
-    const { error } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', guru.id);
-    if (error) {
-      alert('Gagal hapus: ' + error.message);
-      return;
-    }
-    fetchGuru();
-  }
+  if (!confirm(`Yakin hapus guru "${guru.nama}"? Data akan dihapus permanen.`)) return;
 
+  try {
+    await deleteUser(guru.id);
+    fetchGuru();
+  } catch (err) {
+    alert('Gagal hapus: ' + err.message);
+  }
+}
   function handleTambah() {
     setEditingGuru(null);
     setShowModal(true);
