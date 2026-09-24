@@ -16,12 +16,17 @@ import DashboardSiswa from './pages/DashboardSiswa';
 import KelolaSiswa from './pages/KelolaSiswa';
 import KelolaGuru from './pages/KelolaGuru';
 import KelolaPengumuman from './pages/KelolaPengumuman';
+// === PANEL GURU ===
+import InputNilai from './pages/InputNilai';
+import InputAbsensi from './pages/InputAbsensi';
+import JadwalMengajar from './pages/JadwalMengajar';
+import DaftarSiswaGuru from './pages/DaftarSiswaGuru';
 
 function App() {
   const [page, setPage] = useState('beranda');
   const { user, profile, logout } = useAuth();
 
-  // === GUARD 1: Halaman login ===
+  // === GUARD 1: Login ===
   if (page === 'login') {
     if (user && profile) {
       return renderDashboard(profile, setPage, user, logout);
@@ -29,7 +34,7 @@ function App() {
     return <Login onSuccess={() => setPage('dashboard')} />;
   }
 
-  // === GUARD 2: Halaman dashboard ===
+  // === GUARD 2: Dashboard ===
   if (page === 'dashboard') {
     if (!user) {
       return <Login onSuccess={() => setPage('dashboard')} />;
@@ -40,73 +45,126 @@ function App() {
     return renderDashboard(profile, setPage, user, logout);
   }
 
-  // === GUARD 3: Halaman kelola-siswa (hanya admin) ===
+  // === GUARD 3: Kelola Siswa (admin) ===
   if (page === 'kelola-siswa') {
-    if (!user) {
-      return <Login onSuccess={() => setPage('kelola-siswa')} />;
-    }
-    if (!profile) {
-      return <LoadingProfile />;
-    }
+    if (!user) return <Login onSuccess={() => setPage('kelola-siswa')} />;
+    if (!profile) return <LoadingProfile />;
     return (
-      <div className="min-h-screen bg-[#F8FAFC]">
-        <Header
-          currentPage="kelola-siswa"
-          onNavigate={setPage}
-          user={user}
-          profile={profile}
-          onLogout={logout}
-        />
+      <PageWrapper
+        currentPage="kelola-siswa"
+        setPage={setPage}
+        user={user}
+        profile={profile}
+        logout={logout}
+      >
         <KelolaSiswa onNavigate={setPage} />
-      </div>
+      </PageWrapper>
     );
   }
 
-    // === GUARD 4: Halaman kelola-guru (hanya admin) ===
+  // === GUARD 4: Kelola Guru (admin) ===
   if (page === 'kelola-guru') {
-    if (!user) {
-      return <Login onSuccess={() => setPage('kelola-guru')} />;
-    }
-    if (!profile) {
-      return <LoadingProfile />;
-    }
+    if (!user) return <Login onSuccess={() => setPage('kelola-guru')} />;
+    if (!profile) return <LoadingProfile />;
     return (
-      <div className="min-h-screen bg-[#F8FAFC]">
-        <Header
-          currentPage="kelola-guru"
-          onNavigate={setPage}
-          user={user}
-          profile={profile}
-          onLogout={logout}
-        />
+      <PageWrapper
+        currentPage="kelola-guru"
+        setPage={setPage}
+        user={user}
+        profile={profile}
+        logout={logout}
+      >
         <KelolaGuru onNavigate={setPage} />
-      </div>
+      </PageWrapper>
     );
   }
 
-  // === GUARD 5: Halaman kelola-pengumuman (hanya admin) ===
+  // === GUARD 5: Kelola Pengumuman (admin) ===
   if (page === 'kelola-pengumuman') {
-    if (!user) {
-      return <Login onSuccess={() => setPage('kelola-pengumuman')} />;
-    }
-    if (!profile) {
-      return <LoadingProfile />;
-    }
+    if (!user) return <Login onSuccess={() => setPage('kelola-pengumuman')} />;
+    if (!profile) return <LoadingProfile />;
     return (
-      <div className="min-h-screen bg-[#F8FAFC]">
-        <Header
-          currentPage="kelola-pengumuman"
-          onNavigate={setPage}
-          user={user}
-          profile={profile}
-          onLogout={logout}
-        />
+      <PageWrapper
+        currentPage="kelola-pengumuman"
+        setPage={setPage}
+        user={user}
+        profile={profile}
+        logout={logout}
+      >
         <KelolaPengumuman onNavigate={setPage} />
-      </div>
+      </PageWrapper>
     );
   }
 
-  // === Halaman publik biasa ===
+  // === GUARD 6: Input Nilai (guru) ===
+  if (page === 'input-nilai') {
+    if (!user) return <Login onSuccess={() => setPage('input-nilai')} />;
+    if (!profile) return <LoadingProfile />;
+    return (
+      <PageWrapper
+        currentPage="input-nilai"
+        setPage={setPage}
+        user={user}
+        profile={profile}
+        logout={logout}
+      >
+        <InputNilai onNavigate={setPage} />
+      </PageWrapper>
+    );
+  }
+
+  // === GUARD 7: Input Absensi (guru) ===
+  if (page === 'input-absensi') {
+    if (!user) return <Login onSuccess={() => setPage('input-absensi')} />;
+    if (!profile) return <LoadingProfile />;
+    return (
+      <PageWrapper
+        currentPage="input-absensi"
+        setPage={setPage}
+        user={user}
+        profile={profile}
+        logout={logout}
+      >
+        <InputAbsensi onNavigate={setPage} />
+      </PageWrapper>
+    );
+  }
+
+  // === GUARD 8: Jadwal Mengajar (guru) ===
+  if (page === 'jadwal-mengajar') {
+    if (!user) return <Login onSuccess={() => setPage('jadwal-mengajar')} />;
+    if (!profile) return <LoadingProfile />;
+    return (
+      <PageWrapper
+        currentPage="jadwal-mengajar"
+        setPage={setPage}
+        user={user}
+        profile={profile}
+        logout={logout}
+      >
+        <JadwalMengajar onNavigate={setPage} />
+      </PageWrapper>
+    );
+  }
+
+  // === GUARD 9: Daftar Siswa Guru (guru) ===
+  if (page === 'daftar-siswa-guru') {
+    if (!user) return <Login onSuccess={() => setPage('daftar-siswa-guru')} />;
+    if (!profile) return <LoadingProfile />;
+    return (
+      <PageWrapper
+        currentPage="daftar-siswa-guru"
+        setPage={setPage}
+        user={user}
+        profile={profile}
+        logout={logout}
+      >
+        <DaftarSiswaGuru onNavigate={setPage} />
+      </PageWrapper>
+    );
+  }
+
+  // === HALAMAN PUBLIK ===
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Header
@@ -116,7 +174,6 @@ function App() {
         profile={profile}
         onLogout={logout}
       />
-
       <main>
         {page === 'beranda' && <Beranda onNavigate={setPage} />}
         {page === 'profil' && <Profil />}
@@ -127,6 +184,22 @@ function App() {
         {page === 'download' && <Download />}
         {page === 'kontak' && <Kontak />}
       </main>
+    </div>
+  );
+}
+
+// === Helper: wrapper dengan Header ===
+function PageWrapper({ currentPage, setPage, user, profile, logout, children }) {
+  return (
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <Header
+        currentPage={currentPage}
+        onNavigate={setPage}
+        user={user}
+        profile={profile}
+        onLogout={logout}
+      />
+      {children}
     </div>
   );
 }

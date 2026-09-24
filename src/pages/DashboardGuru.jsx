@@ -1,10 +1,66 @@
-import { ArrowLeft, LogOut, Construction } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+  ArrowLeft,
+  LogOut,
+  BookOpen,
+  Users,
+  FileText,
+  Calendar,
+  ClipboardCheck,
+  ChevronRight,
+  Bell,
+  TrendingUp,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 
 export default function DashboardGuru({ onNavigate }) {
   const { user, profile, logout } = useAuth();
+  const [stats, setStats] = useState({ kelas: 0, siswa: 0, nilai: 0 });
+  const [pengumuman, setPengumuman] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Loading state
+  useEffect(() => {
+    if (profile?.role === 'guru') {
+      fetchData();
+    }
+  }, [profile]);
+
+  async function fetchData() {
+    try {
+      // 1. Jumlah siswa (yang punya role 'siswa')
+      const { count: countSiswa } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'siswa');
+
+      // 2. Jumlah nilai yang pernah diinput guru ini
+      const { count: countNilai } = await supabase
+        .from('nilai')
+        .select('*', { count: 'exact', head: true })
+        .eq('guru_id', user?.id);
+
+      // 3. Ambil pengumuman terbaru (max 3)
+      const { data: pengumumanData } = await supabase
+        .from('pengumuman')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      setStats({
+        kelas: 6, // X-A, X-B, XI-A, XI-B, XII-A, XII-B
+        siswa: countSiswa || 0,
+        nilai: countNilai || 0,
+      });
+      setPengumuman(pengumumanData || []);
+    } catch (err) {
+      console.error('Error fetch data guru:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // === Loading state ===
   if (!user || !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
@@ -16,7 +72,7 @@ export default function DashboardGuru({ onNavigate }) {
     );
   }
 
-  // Guard: bukan guru → tolak
+  // === Guard: bukan guru ===
   if (profile.role !== 'guru') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4">
@@ -40,6 +96,45 @@ export default function DashboardGuru({ onNavigate }) {
     );
   }
 
+  // === Menu Cepat ===
+  const menuCepat = [
+    {
+      id: 'input-nilai',
+      label: 'Input Nilai',
+      desc: 'Input nilai siswa',
+      icon: FileText,
+      color: 'from-blue-500 to-blue-700',
+    },
+    {
+      id: 'input-absensi',
+      label: 'Input Absensi',
+      desc: 'Absensi harian',
+      icon: ClipboardCheck,
+      color: 'from-emerald-500 to-emerald-700',
+    },
+    {
+      id: 'jadwal-mengajar',
+      label: 'Jadwal Saya',
+      desc: 'Jadwal mengajar',
+      icon: Calendar,
+      color: 'from-purple-500 to-purple-700',
+    },
+    {
+      id: 'daftar-siswa-guru',
+      label: 'Siswa Saya',
+      desc: 'Daftar siswa',
+      icon: Users,
+      color: 'from-amber-500 to-orange-600',
+    },
+  ];
+
+  // === Jadwal Hari Ini (hardcode dulu dari HTML asli) ===
+  const jadwalHariIni = [
+    { jam: '07.30 - 08.30', kelas: 'X-A', mapel: 'Bahasa Inggris', ruang: 'R-01' },
+    { jam: '10.00 - 11.00', kelas: 'XI-A', mapel: 'Bahasa Inggris', ruang: 'R-03' },
+    { jam: '11.30 - 12.00', kelas: 'XII-A', mapel: 'Bahasa Inggris', ruang: 'R-05' },
+  ];
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] py-8 px-4 lg:px-6">
       <div className="mx-auto max-w-[1200px]">
@@ -56,7 +151,9 @@ export default function DashboardGuru({ onNavigate }) {
               <h1 className="text-2xl lg:text-3xl font-extrabold">
                 Selamat Datang, {profile.nama} 👋
               </h1>
-              <p className="text-white/70 text-sm mt-1">{profile.email}</p>
+              <p className="text-white/70 text-sm mt-1">
+                Guru {profile.mapel || '-'} • {profile.email}
+              </p>
             </div>
             <div className="flex gap-2">
               <button
@@ -77,33 +174,184 @@ export default function DashboardGuru({ onNavigate }) {
           </div>
         </div>
 
-        {/* Placeholder */}
-        <div className="bg-white rounded-2xl border-2 border-dashed border-emerald-300 p-12 text-center">
-          <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
-            <Construction className="w-10 h-10 text-emerald-500" />
+        {/* Statistik */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                <BookOpen className="w-5 h-5 text-blue-600" />
+              </div>
+              <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                KELAS
+              </span>
+            </div>
+            <div className="mt-3 text-[32px] font-extrabold text-slate-900 leading-none">
+              {stats.kelas}
+            </div>
+            <div className="mt-1 text-[13px] font-bold text-slate-600">
+              Kelas Diajar
+            </div>
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">
-            Panel Guru Segera Hadir
-          </h2>
-          <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-            Fitur untuk guru (input nilai, absensi, materi, jadwal mengajar) akan
-            ditambahkan setelah panel admin selesai dan user guru sudah dibuat.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-2 text-[11px] text-slate-400">
-            <span className="px-3 py-1 rounded-full bg-slate-100">📝 Input Nilai</span>
-            <span className="px-3 py-1 rounded-full bg-slate-100">✅ Absensi</span>
-            <span className="px-3 py-1 rounded-full bg-slate-100">📚 Materi</span>
-            <span className="px-3 py-1 rounded-full bg-slate-100">📅 Jadwal</span>
+
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <Users className="w-5 h-5 text-emerald-600" />
+              </div>
+              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full">
+                SISWA
+              </span>
+            </div>
+            <div className="mt-3 text-[32px] font-extrabold text-slate-900 leading-none">
+              {stats.siswa}
+            </div>
+            <div className="mt-1 text-[13px] font-bold text-slate-600">
+              Total Siswa
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-amber-600" />
+              </div>
+              <span className="text-[10px] font-bold bg-amber-50 text-amber-700 px-2 py-1 rounded-full">
+                NILAI
+              </span>
+            </div>
+            <div className="mt-3 text-[32px] font-extrabold text-slate-900 leading-none">
+              {stats.nilai}
+            </div>
+            <div className="mt-1 text-[13px] font-bold text-slate-600">
+              Nilai Diinput
+            </div>
           </div>
         </div>
 
-        {/* Info */}
-        <div className="mt-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
-          <p className="text-xs text-emerald-800 leading-relaxed">
-            <strong>💡 Info:</strong> Panel ini masih placeholder. Login sebagai
-            guru sudah berfungsi, tapi fitur-fiturnya belum dibuat. Fokus sekarang
-            adalah menyelesaikan alur role-based routing.
-          </p>
+        {/* Menu Cepat */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm mb-6">
+          <h2 className="text-lg font-bold text-slate-900 mb-4">Menu Cepat</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {menuCepat.map((menu) => {
+              const Icon = menu.icon;
+              return (
+                <button
+                  key={menu.id}
+                  onClick={() => onNavigate(menu.id)}
+                  className="group p-4 rounded-2xl border border-slate-200 hover:border-emerald-300 hover:shadow-md transition text-left"
+                >
+                  <div
+                    className={`w-11 h-11 rounded-xl bg-gradient-to-br ${menu.color} flex items-center justify-center mb-3 group-hover:scale-105 transition`}
+                  >
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="font-bold text-[13px] text-slate-900">
+                    {menu.label}
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5">
+                    {menu.desc}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Grid: Jadwal + Pengumuman */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Jadwal Hari Ini */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-emerald-600" />
+                Jadwal Hari Ini
+              </h2>
+              <button
+                onClick={() => onNavigate('jadwal-mengajar')}
+                className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+              >
+                Lihat Semua
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {jadwalHariIni.map((j, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-[#F8FAFC] border border-slate-100"
+                >
+                  <div className="w-16 h-12 rounded-xl bg-emerald-500 text-white flex flex-col items-center justify-center leading-none shrink-0">
+                    <div className="text-[11px] font-extrabold">
+                      {j.jam.split(' - ')[0]}
+                    </div>
+                    <div className="text-[9px] opacity-80 mt-0.5">
+                      {j.jam.split(' - ')[1]}
+                    </div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[13px] font-bold text-slate-900">
+                      {j.mapel}
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      Kelas {j.kelas} • {j.ruang}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {jadwalHariIni.length === 0 && (
+                <div className="text-center py-8 text-slate-400 text-sm">
+                  Tidak ada jadwal hari ini
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Pengumuman */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Bell className="w-5 h-5 text-amber-600" />
+                Pengumuman
+              </h2>
+              <button
+                onClick={() => onNavigate('informasi')}
+                className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+              >
+                Lihat Semua
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {loading ? (
+                <div className="text-center py-8 text-slate-400 text-sm">
+                  Memuat pengumuman...
+                </div>
+              ) : pengumuman.length === 0 ? (
+                <div className="text-center py-8 text-slate-400 text-sm">
+                  Belum ada pengumuman
+                </div>
+              ) : (
+                pengumuman.map((p) => (
+                  <div
+                    key={p.id}
+                    className="p-3 rounded-xl bg-[#F8FAFC] border border-slate-100"
+                  >
+                    <div className="text-[13px] font-bold text-slate-900 line-clamp-2">
+                      {p.judul}
+                    </div>
+                    <div className="text-[11px] text-slate-500 mt-1">
+                      {p.kategori || 'Umum'} •{' '}
+                      {new Date(p.created_at).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
