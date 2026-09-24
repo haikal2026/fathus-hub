@@ -10,34 +10,42 @@ export default function Beranda({ onNavigate }) {
 
   useEffect(() => {
     async function fetchPengumuman() {
-      const { data, error } = await supabase
-        .from('pengumuman')
-        .select('*')
-        .order('penting', { ascending: false })
-        .order('tanggal', { ascending: false })
-        .limit(3);
+      try {
+        const { data, error } = await supabase
+          .from('pengumuman')
+          .select('*')
+          .order('penting', { ascending: false })
+          .order('tanggal', { ascending: false })
+          .limit(3);
 
-      if (!error && data) setPengumumanList(data);
-      setLoadingPengumuman(false);
+        if (!error && data) setPengumumanList(data);
+      } catch (err) {
+        console.error('Error fetch pengumuman:', err);
+      } finally {
+        setLoadingPengumuman(false);
+      }
     }
 
     async function fetchStats() {
-      const { count: siswaCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'siswa');
+      try {
+        // Pakai RPC (aman untuk guest)
+        const [siswaRes, guruRes] = await Promise.all([
+          supabase.rpc('count_siswa'),
+          supabase.rpc('count_guru'),
+        ]);
 
-      const { count: guruCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'guru');
-
-      setStats({
-        siswa: siswaCount ?? 0,
-        guru: guruCount ?? 0,
-        ekskul: 3,
-      });
-      setLoadingStats(false);
+        setStats({
+          siswa: siswaRes.data ?? 0,
+          guru: guruRes.data ?? 0,
+          ekskul: 3,
+        });
+      } catch (err) {
+        console.error('Error fetch stats:', err);
+        // Fallback: pakai angka statis dari HTML asli
+        setStats({ siswa: 164, guru: 15, ekskul: 3 });
+      } finally {
+        setLoadingStats(false);
+      }
     }
 
     fetchPengumuman();
@@ -62,8 +70,8 @@ export default function Beranda({ onNavigate }) {
           className="absolute inset-0 opacity-[0.07]"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
-            backgroundSize: "32px 32px",
+              'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+            backgroundSize: '32px 32px',
           }}
         />
         <div className="absolute -top-20 -right-20 w-[400px] h-[400px] bg-[#FBBF24] rounded-full blur-[100px] opacity-20" />
@@ -96,13 +104,13 @@ export default function Beranda({ onNavigate }) {
 
           <div className="mt-6 flex flex-wrap gap-3">
             <button
-              onClick={() => onNavigate("profil")}
+              onClick={() => onNavigate('profil')}
               className="h-11 px-6 rounded-full bg-[#FBBF24] text-[#0F4C81] font-extrabold text-[14px] shadow hover:bg-yellow-400 transition"
             >
               Jelajahi Profil →
             </button>
             <button
-              onClick={() => onNavigate("akademik")}
+              onClick={() => onNavigate('akademik')}
               className="h-11 px-6 rounded-full bg-white/10 border border-white/20 text-white font-semibold text-[14px] hover:bg-white/15 transition"
             >
               Lihat Jadwal
@@ -122,9 +130,9 @@ export default function Beranda({ onNavigate }) {
             </div>
             <div className="space-y-2">
               {[
-                { jam: "07.00", title: "Tahfidz & Dhuha Bersama", loc: "Masjid Sekolah" },
-                { jam: "08.30", title: "Ujian Tengah Semester", loc: "Ruang 3 & 4" },
-                { jam: "13.00", title: "Ekstrakurikuler Pramuka", loc: "Lapangan Utama" },
+                { jam: '07.00', title: 'Tahfidz & Dhuha Bersama', loc: 'Masjid Sekolah' },
+                { jam: '08.30', title: 'Ujian Tengah Semester', loc: 'Ruang 3 & 4' },
+                { jam: '13.00', title: 'Ekstrakurikuler Pramuka', loc: 'Lapangan Utama' },
               ].map((item, i) => (
                 <div
                   key={i}
@@ -215,7 +223,7 @@ export default function Beranda({ onNavigate }) {
               📢 Pengumuman Terbaru
             </h3>
             <button
-              onClick={() => onNavigate("informasi")}
+              onClick={() => onNavigate('informasi')}
               className="text-[12px] font-bold text-[#0F4C81]"
             >
               Lihat semua →
@@ -240,7 +248,7 @@ export default function Beranda({ onNavigate }) {
               >
                 <div
                   className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-[20px] ${
-                    item.penting ? "bg-amber-100" : "bg-blue-50"
+                    item.penting ? 'bg-amber-100' : 'bg-blue-50'
                   }`}
                 >
                   📢
@@ -272,7 +280,7 @@ export default function Beranda({ onNavigate }) {
               📰 Berita Sekolah
             </h3>
             <button
-              onClick={() => onNavigate("informasi")}
+              onClick={() => onNavigate('informasi')}
               className="text-[12px] font-bold text-[#0F4C81]"
             >
               Lihat semua →
@@ -282,16 +290,16 @@ export default function Beranda({ onNavigate }) {
           <div className="grid md:grid-cols-2 gap-3">
             {[
               {
-                kategori: "Prestasi",
-                tgl: "05 Sept 2026",
-                judul: "MA Fathus Salafi Raih Juara 1 MTQ Kabupaten 2026",
-                desc: "Siswa atas nama Ahmad Zulfikar berhasil meraih juara 1 kategori Tahfidz 10 Juz.",
+                kategori: 'Prestasi',
+                tgl: '05 Sept 2026',
+                judul: 'MA Fathus Salafi Raih Juara 1 MTQ Kabupaten 2026',
+                desc: 'Siswa atas nama Ahmad Zulfikar berhasil meraih juara 1 kategori Tahfidz 10 Juz.',
               },
               {
-                kategori: "Ekstrakurikuler",
-                tgl: "02 Sept 2026",
-                judul: "Perkemahan Pramuka Blok 2026 Berjalan Sukses",
-                desc: "Perkemahan selama 3 hari diikuti 180 peserta dari kelas X dan XI.",
+                kategori: 'Ekstrakurikuler',
+                tgl: '02 Sept 2026',
+                judul: 'Perkemahan Pramuka Blok 2026 Berjalan Sukses',
+                desc: 'Perkemahan selama 3 hari diikuti 180 peserta dari kelas X dan XI.',
               },
             ].map((item, i) => (
               <div
@@ -322,9 +330,9 @@ export default function Beranda({ onNavigate }) {
             </h3>
             <div className="space-y-3">
               {[
-                { tgl: "21", bln: "SEP", title: "Ujian Tengah Semester", time: "07.30 - Selesai" },
-                { tgl: "24", bln: "SEP", title: "Upacara Hari Pramuka", time: "07.00 - 08.00" },
-                { tgl: "28", bln: "SEP", title: "Peringatan Maulid Nabi SAW", time: "08.00 - 11.00" },
+                { tgl: '21', bln: 'SEP', title: 'Ujian Tengah Semester', time: '07.30 - Selesai' },
+                { tgl: '24', bln: 'SEP', title: 'Upacara Hari Pramuka', time: '07.00 - 08.00' },
+                { tgl: '28', bln: 'SEP', title: 'Peringatan Maulid Nabi SAW', time: '08.00 - 11.00' },
               ].map((item, i) => (
                 <div key={i} className="flex gap-3">
                   <div className="w-12 h-12 rounded-xl bg-[#0F4C81] text-white flex flex-col items-center justify-center leading-none shrink-0">
@@ -354,9 +362,9 @@ export default function Beranda({ onNavigate }) {
             </h3>
             <div className="space-y-2.5">
               {[
-                { icon: "🥇", title: "Juara 1 MTQ Tahfidz 10 Juz", siswa: "Ahmad Zulfikar - XII Putra" },
-                { icon: "🥈", title: "Juara 2 Olimpiade Matematika", siswa: "Fatimah Zahra - XII Putri" },
-                { icon: "🏅", title: "Juara Harapan 1 Pidato B. Arab", siswa: "Zayd Al-Farisi - XI Putra" },
+                { icon: '🥇', title: 'Juara 1 MTQ Tahfidz 10 Juz', siswa: 'Ahmad Zulfikar - XII Putra' },
+                { icon: '🥈', title: 'Juara 2 Olimpiade Matematika', siswa: 'Fatimah Zahra - XII Putri' },
+                { icon: '🏅', title: 'Juara Harapan 1 Pidato B. Arab', siswa: 'Zayd Al-Farisi - XI Putra' },
               ].map((item, i) => (
                 <div
                   key={i}
@@ -380,14 +388,14 @@ export default function Beranda({ onNavigate }) {
             <div className="text-[13px] font-bold">⚡ Akses Cepat</div>
             <div className="grid grid-cols-4 gap-2 mt-3">
               {[
-                { id: "akademik", emoji: "📚", label: "Jadwal" },
-                { id: "perpus", emoji: "📖", label: "Perpus" },
-                { id: "kesiswaan", emoji: "👥", label: "Siswa" },
-                { id: "galeri", emoji: "📸", label: "Galeri" },
-                { id: "informasi", emoji: "📢", label: "Info" },
-                { id: "download", emoji: "📥", label: "File" },
-                { id: "profil", emoji: "🏫", label: "Profil" },
-                { id: "kontak", emoji: "📞", label: "Kontak" },
+                { id: 'akademik', emoji: '📚', label: 'Jadwal' },
+                { id: 'perpus', emoji: '📖', label: 'Perpus' },
+                { id: 'kesiswaan', emoji: '👥', label: 'Siswa' },
+                { id: 'galeri', emoji: '📸', label: 'Galeri' },
+                { id: 'informasi', emoji: '📢', label: 'Info' },
+                { id: 'download', emoji: '📥', label: 'File' },
+                { id: 'profil', emoji: '🏫', label: 'Profil' },
+                { id: 'kontak', emoji: '📞', label: 'Kontak' },
               ].map((item) => (
                 <button
                   key={item.id}
