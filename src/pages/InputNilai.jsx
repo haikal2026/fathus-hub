@@ -8,6 +8,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { supabase } from '../lib/supabase';
 
 const KELAS_OPTIONS = ['X-A', 'X-B', 'XI-A', 'XI-B', 'XII-A', 'XII-B'];
@@ -15,6 +16,7 @@ const JENIS_OPTIONS = ['Harian', 'Tugas', 'UTS', 'UAS'];
 
 export default function InputNilai({ onNavigate }) {
   const { user, profile } = useAuth();
+  const { toast } = useToast();
   const [kelas, setKelas] = useState('X-A');
   const [jenis, setJenis] = useState('Harian');
   const [mapel, setMapel] = useState('');
@@ -23,7 +25,6 @@ export default function InputNilai({ onNavigate }) {
   const [nilaiMap, setNilaiMap] = useState({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (profile?.mapel && !mapel) {
@@ -52,6 +53,7 @@ export default function InputNilai({ onNavigate }) {
       setNilaiMap({});
     } catch (err) {
       console.error('Error fetch siswa:', err);
+      toast.error('Gagal memuat data siswa: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -74,11 +76,11 @@ export default function InputNilai({ onNavigate }) {
   async function handleSave() {
     const entries = Object.entries(nilaiMap);
     if (entries.length === 0) {
-      alert('Belum ada nilai yang diinput.');
+      toast.warning('Belum ada nilai yang diinput.');
       return;
     }
     if (!mapel.trim()) {
-      alert('Mapel wajib diisi.');
+      toast.warning('Mapel wajib diisi.');
       return;
     }
     setSaving(true);
@@ -94,12 +96,11 @@ export default function InputNilai({ onNavigate }) {
       }));
       const { error } = await supabase.from('nilai').insert(payload);
       if (error) throw error;
-      setSuccess(true);
+      toast.success(`${entries.length} nilai berhasil disimpan!`);
       setNilaiMap({});
-      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error('Error save nilai:', err);
-      alert('Gagal simpan nilai: ' + err.message);
+      toast.error('Gagal simpan nilai: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -284,15 +285,6 @@ export default function InputNilai({ onNavigate }) {
             </div>
           )}
         </div>
-
-        {success && (
-          <div className="mb-4 bg-emerald-500 text-white rounded-2xl p-4 flex items-center gap-3 shadow-lg">
-            <CheckCircle2 className="w-5 h-5" />
-            <div className="text-sm font-bold">
-              ✅ Nilai berhasil disimpan ke database!
-            </div>
-          </div>
-        )}
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm text-slate-600">

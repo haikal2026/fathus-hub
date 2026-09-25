@@ -4,9 +4,9 @@ import {
   Save,
   Users,
   ClipboardCheck,
-  CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { supabase } from '../lib/supabase';
 
 const KELAS_OPTIONS = ['X-A', 'X-B', 'XI-A', 'XI-B', 'XII-A', 'XII-B'];
@@ -20,6 +20,7 @@ const STATUS_OPTIONS = [
 
 export default function InputAbsensi({ onNavigate }) {
   const { user, profile } = useAuth();
+  const { toast } = useToast();
   const [kelas, setKelas] = useState('X-A');
   const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10));
   const [mapel, setMapel] = useState('');
@@ -27,7 +28,6 @@ export default function InputAbsensi({ onNavigate }) {
   const [absenMap, setAbsenMap] = useState({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (profile?.mapel && !mapel) setMapel(profile.mapel);
@@ -51,7 +51,6 @@ export default function InputAbsensi({ onNavigate }) {
 
       if (error) throw error;
       setSiswaList(data || []);
-      // default semua hadir
       const defaultAbsen = {};
       (data || []).forEach((s) => {
         defaultAbsen[s.id] = 'hadir';
@@ -59,6 +58,7 @@ export default function InputAbsensi({ onNavigate }) {
       setAbsenMap(defaultAbsen);
     } catch (err) {
       console.error('Error fetch siswa:', err);
+      toast.error('Gagal memuat data siswa: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -74,11 +74,12 @@ export default function InputAbsensi({ onNavigate }) {
       allHadir[s.id] = 'hadir';
     });
     setAbsenMap(allHadir);
+    toast.info('Semua siswa ditandai hadir');
   }
 
   async function handleSave() {
     if (siswaList.length === 0) {
-      alert('Belum ada siswa di kelas ini.');
+      toast.warning('Belum ada siswa di kelas ini.');
       return;
     }
     setSaving(true);
@@ -92,11 +93,10 @@ export default function InputAbsensi({ onNavigate }) {
       }));
       const { error } = await supabase.from('absensi').insert(payload);
       if (error) throw error;
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      toast.success(`Absensi ${siswaList.length} siswa berhasil disimpan!`);
     } catch (err) {
       console.error('Error save absensi:', err);
-      alert('Gagal simpan absensi: ' + err.message);
+      toast.error('Gagal simpan absensi: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -328,15 +328,6 @@ export default function InputAbsensi({ onNavigate }) {
             </div>
           )}
         </div>
-
-        {success && (
-          <div className="mb-4 bg-emerald-500 text-white rounded-2xl p-4 flex items-center gap-3 shadow-lg">
-            <CheckCircle2 className="w-5 h-5" />
-            <div className="text-sm font-bold">
-              ✅ Absensi berhasil disimpan ke database!
-            </div>
-          </div>
-        )}
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm text-slate-600">

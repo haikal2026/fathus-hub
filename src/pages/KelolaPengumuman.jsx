@@ -12,16 +12,19 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const KATEGORI_OPTIONS = ['Akademik', 'Kesiswaan', 'Umum', 'Pengumuman'];
 
 export default function KelolaPengumuman({ onNavigate }) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(null);
 
   async function fetchData() {
     setLoading(true);
@@ -49,16 +52,28 @@ export default function KelolaPengumuman({ onNavigate }) {
   });
 
   async function handleDelete(item) {
-    if (!confirm(`Yakin hapus pengumuman "${item.judul}"?`)) return;
-    const { error } = await supabase
-      .from('pengumuman')
-      .delete()
-      .eq('id', item.id);
-    if (error) {
-      alert('Gagal hapus: ' + error.message);
-      return;
+    if (deleteLoading) return;
+
+    const ok = window.confirm(`Yakin hapus pengumuman "${item.judul}"?`);
+    if (!ok) return;
+
+    setDeleteLoading(item.id);
+    try {
+      const { error } = await supabase
+        .from('pengumuman')
+        .delete()
+        .eq('id', item.id);
+
+      if (error) throw error;
+
+      await fetchData();
+      toast.success(`Pengumuman "${item.judul}" berhasil dihapus!`);
+    } catch (error) {
+      console.error('❌ Error delete pengumuman:', error);
+      toast.error('Gagal hapus: ' + error.message);
+    } finally {
+      setDeleteLoading(null);
     }
-    fetchData();
   }
 
   function handleTambah() {
@@ -173,10 +188,19 @@ export default function KelolaPengumuman({ onNavigate }) {
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
-                        onClick={() => handleDelete(p)}
-                        className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition flex items-center justify-center"
+                        onClick={() => {
+                          if (deleteLoading !== p.id) handleDelete(p);
+                        }}
+                        disabled={deleteLoading === p.id}
+                        className={`w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition flex items-center justify-center ${
+                          deleteLoading === p.id ? 'opacity-50' : ''
+                        }`}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        {deleteLoading === p.id ? (
+                          <span className="w-3.5 h-3.5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -204,6 +228,7 @@ export default function KelolaPengumuman({ onNavigate }) {
 
 /* Modal Form */
 function PengumumanModal({ item, userId, onClose, onSuccess }) {
+  const { toast } = useToast();
   const isEdit = !!item;
   const [form, setForm] = useState({
     judul: item?.judul || '',
@@ -239,16 +264,19 @@ function PengumumanModal({ item, userId, onClose, onSuccess }) {
           .update(payload)
           .eq('id', item.id);
         if (err) throw err;
+        toast.success('Pengumuman berhasil diupdate!');
       } else {
         const { error: err } = await supabase
           .from('pengumuman')
           .insert({ ...payload, created_by: userId });
         if (err) throw err;
+        toast.success('Pengumuman baru berhasil ditambahkan!');
       }
 
       onSuccess();
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan');
+      toast.error(err.message || 'Terjadi kesalahan');
     } finally {
       setLoading(false);
     }

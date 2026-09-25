@@ -12,9 +12,11 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export default function DashboardAdmin({ onNavigate }) {
   const { user, profile, logout } = useAuth();
+  const { toast } = useToast();
   const [stats, setStats] = useState({ siswa: 0, guru: 0, ekskul: 3 });
   const [loadingStats, setLoadingStats] = useState(true);
 
@@ -174,7 +176,7 @@ export default function DashboardAdmin({ onNavigate }) {
             <QuickButton
               icon={<Settings className="w-5 h-5" />}
               label="Pengaturan"
-              onClick={() => alert('Segera hadir!')}
+              onClick={() => toast.info('Fitur segera hadir! 🚧')}
             />
           </div>
         </div>

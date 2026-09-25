@@ -11,12 +11,14 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { useToast } from '../context/ToastContext';
 
 const KELAS_OPTIONS = ['Semua', 'X-A', 'X-B', 'XI-A', 'XI-B', 'XII-A', 'XII-B'];
 const JENIS_OPTIONS = ['Semua', 'Harian', 'Tugas', 'UTS', 'UAS'];
 
 export default function RekapNilai({ onNavigate }) {
   const { user, profile } = useAuth();
+  const { toast } = useToast();
   const [nilaiList, setNilaiList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -101,31 +103,31 @@ export default function RekapNilai({ onNavigate }) {
   }
 
   async function handleDelete(nilai) {
-    const namaSiswa = nilai.siswa?.nama || 'Siswa';
-    const ok = window.confirm(
-      `Yakin hapus nilai ${nilai.nilai} untuk ${namaSiswa}?`
-    );
-    if (!ok) return;
+  const namaSiswa = nilai.siswa?.nama || 'Siswa';
+  const ok = window.confirm(
+    `Yakin hapus nilai ${nilai.nilai} untuk ${namaSiswa}?`
+  );
+  if (!ok) return;
 
-    setDeleteLoading(nilai.id);
-    try {
-      const { error } = await supabase
-        .from('nilai')
-        .delete()
-        .eq('id', nilai.id);
+  setDeleteLoading(nilai.id);
+  try {
+    const { error } = await supabase
+      .from('nilai')
+      .delete()
+      .eq('id', nilai.id);
 
-      if (error) throw error;
+    if (error) throw error;
 
-      // Refresh list
-      await fetchNilai();
-    } catch (err) {
-      console.error('Error delete nilai:', err);
-      alert('Gagal hapus nilai: ' + err.message);
-    } finally {
-      setDeleteLoading(null);
-    }
+    // Refresh list
+    await fetchNilai();
+    toast.success(`Nilai ${nilai.nilai} untuk ${namaSiswa} berhasil dihapus!`);
+  } catch (err) {
+    console.error('Error delete nilai:', err);
+    toast.error('Gagal hapus nilai: ' + err.message);
+  } finally {
+    setDeleteLoading(null);
   }
-
+}
   // Guard
   if (!user || !profile) {
     return (

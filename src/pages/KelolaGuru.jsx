@@ -10,14 +10,17 @@ import {
   Save,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useToast } from '../context/ToastContext';
 import { createUser, deleteUser } from '../lib/api';
 
 export default function KelolaGuru({ onNavigate }) {
+  const { toast } = useToast();
   const [guruList, setGuruList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingGuru, setEditingGuru] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(null);
 
   async function fetchGuru() {
     setLoading(true);
@@ -46,15 +49,26 @@ export default function KelolaGuru({ onNavigate }) {
   });
 
   async function handleDelete(guru) {
-  if (!confirm(`Yakin hapus guru "${guru.nama}"? Data akan dihapus permanen.`)) return;
+    if (deleteLoading) return;
 
-  try {
-    await deleteUser(guru.id);
-    fetchGuru();
-  } catch (err) {
-    alert('Gagal hapus: ' + err.message);
+    const ok = window.confirm(
+      `Yakin hapus guru "${guru.nama}"? Data akan dihapus permanen.`
+    );
+    if (!ok) return;
+
+    setDeleteLoading(guru.id);
+    try {
+      await deleteUser(guru.id);
+      await fetchGuru();
+      toast.success(`Guru "${guru.nama}" berhasil dihapus!`);
+    } catch (err) {
+      console.error('❌ Error delete guru:', err);
+      toast.error('Gagal hapus: ' + (err.message || 'Unknown error'));
+    } finally {
+      setDeleteLoading(null);
+    }
   }
-}
+
   function handleTambah() {
     setEditingGuru(null);
     setShowModal(true);
@@ -175,10 +189,19 @@ export default function KelolaGuru({ onNavigate }) {
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => handleDelete(g)}
-                            className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition flex items-center justify-center"
+                            onClick={() => {
+                              if (deleteLoading !== g.id) handleDelete(g);
+                            }}
+                            disabled={deleteLoading === g.id}
+                            className={`w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition flex items-center justify-center ${
+                              deleteLoading === g.id ? 'opacity-50' : ''
+                            }`}
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            {deleteLoading === g.id ? (
+                              <span className="w-3.5 h-3.5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Trash2 className="w-3.5 h-3.5" />
+                            )}
                           </button>
                         </div>
                       </td>
@@ -206,6 +229,7 @@ export default function KelolaGuru({ onNavigate }) {
 }
 
 function GuruModal({ guru, onClose, onSuccess }) {
+  const { toast } = useToast();
   const isEdit = !!guru;
   const [form, setForm] = useState({
     nama: guru?.nama || '',
@@ -242,6 +266,7 @@ function GuruModal({ guru, onClose, onSuccess }) {
           .eq('id', guru.id);
 
         if (err) throw err;
+        toast.success('Data guru berhasil diupdate!');
       } else {
         await createUser({
           email: form.email,
@@ -254,11 +279,13 @@ function GuruModal({ guru, onClose, onSuccess }) {
           telepon: form.telepon,
           mapel: form.mapel,
         });
+        toast.success('Guru baru berhasil ditambahkan!');
       }
 
       onSuccess();
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan');
+      toast.error(err.message || 'Terjadi kesalahan');
     } finally {
       setLoading(false);
     }
