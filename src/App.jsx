@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
 import Header from './components/Header';
 import Beranda from './pages/Beranda';
@@ -21,11 +21,21 @@ import InputNilai from './pages/InputNilai';
 import InputAbsensi from './pages/InputAbsensi';
 import JadwalMengajar from './pages/JadwalMengajar';
 import DaftarSiswaGuru from './pages/DaftarSiswaGuru';
-import RekapNilai from './pages/RekapNilai'; // ← BARU
+import RekapNilai from './pages/RekapNilai';
 
 function App() {
   const [page, setPage] = useState('beranda');
   const { user, profile, logout } = useAuth();
+
+  // ============================================
+  // ✅ FIX BUG LOGOUT
+  // Auto redirect ke beranda saat user logout
+  // ============================================
+  useEffect(() => {
+    if (!user) {
+      setPage('beranda');
+    }
+  }, [user]);
 
   // === GUARD 1: Login ===
   if (page === 'login') {
