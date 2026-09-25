@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Bell,
   TrendingUp,
+  Award,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -28,7 +29,7 @@ export default function DashboardGuru({ onNavigate }) {
 
   async function fetchData() {
     try {
-      // 1. Jumlah siswa (yang punya role 'siswa')
+      // 1. Jumlah siswa
       const { count: countSiswa } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
@@ -48,7 +49,7 @@ export default function DashboardGuru({ onNavigate }) {
         .limit(3);
 
       setStats({
-        kelas: 6, // X-A, X-B, XI-A, XI-B, XII-A, XII-B
+        kelas: 6,
         siswa: countSiswa || 0,
         nilai: countNilai || 0,
       });
@@ -106,6 +107,13 @@ export default function DashboardGuru({ onNavigate }) {
       color: 'from-blue-500 to-blue-700',
     },
     {
+      id: 'rekap-nilai',
+      label: 'Rekap Nilai',
+      desc: 'Lihat nilai diinput',
+      icon: Award,
+      color: 'from-cyan-500 to-cyan-700',
+    },
+    {
       id: 'input-absensi',
       label: 'Input Absensi',
       desc: 'Absensi harian',
@@ -128,7 +136,7 @@ export default function DashboardGuru({ onNavigate }) {
     },
   ];
 
-  // === Jadwal Hari Ini (hardcode dulu dari HTML asli) ===
+  // === Jadwal Hari Ini (hardcode dulu) ===
   const jadwalHariIni = [
     { jam: '07.30 - 08.30', kelas: 'X-A', mapel: 'Bahasa Inggris', ruang: 'R-01' },
     { jam: '10.00 - 11.00', kelas: 'XI-A', mapel: 'Bahasa Inggris', ruang: 'R-03' },
@@ -231,7 +239,7 @@ export default function DashboardGuru({ onNavigate }) {
         {/* Menu Cepat */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm mb-6">
           <h2 className="text-lg font-bold text-slate-900 mb-4">Menu Cepat</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
             {menuCepat.map((menu) => {
               const Icon = menu.icon;
               return (
@@ -259,7 +267,6 @@ export default function DashboardGuru({ onNavigate }) {
 
         {/* Grid: Jadwal + Pengumuman */}
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Jadwal Hari Ini */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -298,15 +305,9 @@ export default function DashboardGuru({ onNavigate }) {
                   </div>
                 </div>
               ))}
-              {jadwalHariIni.length === 0 && (
-                <div className="text-center py-8 text-slate-400 text-sm">
-                  Tidak ada jadwal hari ini
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Pengumuman */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">

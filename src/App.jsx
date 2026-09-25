@@ -21,6 +21,7 @@ import InputNilai from './pages/InputNilai';
 import InputAbsensi from './pages/InputAbsensi';
 import JadwalMengajar from './pages/JadwalMengajar';
 import DaftarSiswaGuru from './pages/DaftarSiswaGuru';
+import RekapNilai from './pages/RekapNilai'; // ← BARU
 
 function App() {
   const [page, setPage] = useState('beranda');
@@ -96,6 +97,10 @@ function App() {
     );
   }
 
+  // ============================================
+  // === PANEL GURU — 5 HALAMAN ===
+  // ============================================
+
   // === GUARD 6: Input Nilai (guru) ===
   if (page === 'input-nilai') {
     if (!user) return <Login onSuccess={() => setPage('input-nilai')} />;
@@ -113,7 +118,24 @@ function App() {
     );
   }
 
-  // === GUARD 7: Input Absensi (guru) ===
+  // === GUARD 7: Rekap Nilai (guru) ===
+  if (page === 'rekap-nilai') {
+    if (!user) return <Login onSuccess={() => setPage('rekap-nilai')} />;
+    if (!profile) return <LoadingProfile />;
+    return (
+      <PageWrapper
+        currentPage="rekap-nilai"
+        setPage={setPage}
+        user={user}
+        profile={profile}
+        logout={logout}
+      >
+        <RekapNilai onNavigate={setPage} />
+      </PageWrapper>
+    );
+  }
+
+  // === GUARD 8: Input Absensi (guru) ===
   if (page === 'input-absensi') {
     if (!user) return <Login onSuccess={() => setPage('input-absensi')} />;
     if (!profile) return <LoadingProfile />;
@@ -130,7 +152,7 @@ function App() {
     );
   }
 
-  // === GUARD 8: Jadwal Mengajar (guru) ===
+  // === GUARD 9: Jadwal Mengajar (guru) ===
   if (page === 'jadwal-mengajar') {
     if (!user) return <Login onSuccess={() => setPage('jadwal-mengajar')} />;
     if (!profile) return <LoadingProfile />;
@@ -147,7 +169,7 @@ function App() {
     );
   }
 
-  // === GUARD 9: Daftar Siswa Guru (guru) ===
+  // === GUARD 10: Daftar Siswa Guru (guru) ===
   if (page === 'daftar-siswa-guru') {
     if (!user) return <Login onSuccess={() => setPage('daftar-siswa-guru')} />;
     if (!profile) return <LoadingProfile />;

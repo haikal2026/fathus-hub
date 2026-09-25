@@ -1,4 +1,4 @@
-import { Menu, Search, BookOpen, Calendar, Users, ClipboardCheck } from 'lucide-react';
+import { Menu, Search, BookOpen, Calendar, Users, ClipboardCheck, Award } from 'lucide-react';
 
 const MENU_ITEMS = [
   { id: 'beranda', label: 'Beranda' },
@@ -15,6 +15,7 @@ const MENU_ITEMS = [
 const MENU_GURU = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'input-nilai', label: 'Input Nilai', icon: BookOpen },
+  { id: 'rekap-nilai', label: 'Rekap', icon: Award },
   { id: 'input-absensi', label: 'Absensi', icon: ClipboardCheck },
   { id: 'jadwal-mengajar', label: 'Jadwal', icon: Calendar },
   { id: 'daftar-siswa-guru', label: 'Siswa', icon: Users },
