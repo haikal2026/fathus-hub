@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
 import Header from './components/Header';
+import MenuLayout from './components/MenuLayout';
 import Beranda from './pages/Beranda';
 import Profil from './pages/Profil';
 import Akademik from './pages/Akademik';
@@ -16,187 +17,115 @@ import DashboardSiswa from './pages/DashboardSiswa';
 import KelolaSiswa from './pages/KelolaSiswa';
 import KelolaGuru from './pages/KelolaGuru';
 import KelolaPengumuman from './pages/KelolaPengumuman';
-// === PANEL GURU ===
 import InputNilai from './pages/InputNilai';
 import InputAbsensi from './pages/InputAbsensi';
 import JadwalMengajar from './pages/JadwalMengajar';
 import DaftarSiswaGuru from './pages/DaftarSiswaGuru';
 import RekapNilai from './pages/RekapNilai';
+import SubmenuPlaceholder from './pages/SubmenuPlaceholder';
+import { MENU_DATA, getSubmenus } from './data/menuData';
 
 function App() {
   const [page, setPage] = useState('beranda');
   const { user, profile, logout } = useAuth();
 
-  // ============================================
-  // ✅ FIX BUG LOGOUT
-  // Auto redirect ke beranda saat user logout
-  // ============================================
   useEffect(() => {
-    if (!user) {
-      setPage('beranda');
-    }
+    if (!user) setPage('beranda');
   }, [user]);
 
-  // === GUARD 1: Login ===
-  if (page === 'login') {
-    if (user && profile) {
-      return renderDashboard(profile, setPage, user, logout);
+  // ============================================
+  // CEK APAKAH PAGE ADALAH SUBMENU
+  // 'profil-tentang' → { menuId: 'profil', submenuId: 'tentang' }
+  // ============================================
+  function parseSubmenuPage(pageName) {
+    const parts = pageName.split('-');
+    if (parts.length < 2) return null;
+
+    for (let i = parts.length - 1; i >= 1; i--) {
+      const menuId = parts.slice(0, i).join('-');
+      const submenuId = parts.slice(i).join('-');
+
+      if (MENU_DATA[menuId]) {
+        const submenus = getSubmenus(menuId);
+        const matched = submenus.find((s) => s.id === submenuId);
+        if (matched) {
+          return { menuId, submenuId, submenuLabel: matched.label };
+        }
+      }
     }
+    return null;
+  }
+
+  // === GUARD 1: LOGIN ===
+  if (page === 'login') {
+    if (user && profile) return renderDashboard(profile, setPage, user, logout);
     return <Login onSuccess={() => setPage('dashboard')} />;
   }
 
-  // === GUARD 2: Dashboard ===
+  // === GUARD 2: DASHBOARD ===
   if (page === 'dashboard') {
-    if (!user) {
-      return <Login onSuccess={() => setPage('dashboard')} />;
-    }
-    if (!profile) {
-      return <LoadingProfile />;
-    }
+    if (!user) return <Login onSuccess={() => setPage('dashboard')} />;
+    if (!profile) return <LoadingProfile />;
     return renderDashboard(profile, setPage, user, logout);
   }
 
-  // === GUARD 3: Kelola Siswa (admin) ===
-  if (page === 'kelola-siswa') {
-    if (!user) return <Login onSuccess={() => setPage('kelola-siswa')} />;
+  // === GUARD 3-5: KELOLA (ADMIN) ===
+  if (['kelola-siswa', 'kelola-guru', 'kelola-pengumuman'].includes(page)) {
+    if (!user) return <Login onSuccess={() => setPage(page)} />;
     if (!profile) return <LoadingProfile />;
+
+    const Content =
+      page === 'kelola-siswa' ? KelolaSiswa :
+      page === 'kelola-guru' ? KelolaGuru : KelolaPengumuman;
+
     return (
-      <PageWrapper
-        currentPage="kelola-siswa"
-        setPage={setPage}
-        user={user}
-        profile={profile}
-        logout={logout}
-      >
-        <KelolaSiswa onNavigate={setPage} />
+      <PageWrapper currentPage={page} setPage={setPage} user={user} profile={profile} logout={logout}>
+        <Content onNavigate={setPage} />
       </PageWrapper>
     );
   }
 
-  // === GUARD 4: Kelola Guru (admin) ===
-  if (page === 'kelola-guru') {
-    if (!user) return <Login onSuccess={() => setPage('kelola-guru')} />;
+  // === GUARD 6-10: PANEL GURU ===
+  if (['input-nilai', 'rekap-nilai', 'input-absensi', 'jadwal-mengajar', 'daftar-siswa-guru'].includes(page)) {
+    if (!user) return <Login onSuccess={() => setPage(page)} />;
     if (!profile) return <LoadingProfile />;
+
+    const Content =
+      page === 'input-nilai' ? InputNilai :
+      page === 'rekap-nilai' ? RekapNilai :
+      page === 'input-absensi' ? InputAbsensi :
+      page === 'jadwal-mengajar' ? JadwalMengajar : DaftarSiswaGuru;
+
     return (
-      <PageWrapper
-        currentPage="kelola-guru"
-        setPage={setPage}
-        user={user}
-        profile={profile}
-        logout={logout}
-      >
-        <KelolaGuru onNavigate={setPage} />
+      <PageWrapper currentPage={page} setPage={setPage} user={user} profile={profile} logout={logout}>
+        <Content onNavigate={setPage} />
       </PageWrapper>
     );
   }
 
-  // === GUARD 5: Kelola Pengumuman (admin) ===
-  if (page === 'kelola-pengumuman') {
-    if (!user) return <Login onSuccess={() => setPage('kelola-pengumuman')} />;
-    if (!profile) return <LoadingProfile />;
+  // === SUBMENU PUBLIK (FASE 3 BARU) ===
+  const submenuMatch = parseSubmenuPage(page);
+  if (submenuMatch) {
+    const { menuId, submenuId, submenuLabel } = submenuMatch;
     return (
-      <PageWrapper
-        currentPage="kelola-pengumuman"
-        setPage={setPage}
+      <MenuLayout
+        menuId={menuId}
+        submenuId={submenuId}
+        onNavigate={setPage}
         user={user}
         profile={profile}
-        logout={logout}
+        onLogout={logout}
       >
-        <KelolaPengumuman onNavigate={setPage} />
-      </PageWrapper>
+        <SubmenuPlaceholder
+          menuId={menuId}
+          submenuId={submenuId}
+          submenuLabel={submenuLabel}
+        />
+      </MenuLayout>
     );
   }
 
-  // ============================================
-  // === PANEL GURU — 5 HALAMAN ===
-  // ============================================
-
-  // === GUARD 6: Input Nilai (guru) ===
-  if (page === 'input-nilai') {
-    if (!user) return <Login onSuccess={() => setPage('input-nilai')} />;
-    if (!profile) return <LoadingProfile />;
-    return (
-      <PageWrapper
-        currentPage="input-nilai"
-        setPage={setPage}
-        user={user}
-        profile={profile}
-        logout={logout}
-      >
-        <InputNilai onNavigate={setPage} />
-      </PageWrapper>
-    );
-  }
-
-  // === GUARD 7: Rekap Nilai (guru) ===
-  if (page === 'rekap-nilai') {
-    if (!user) return <Login onSuccess={() => setPage('rekap-nilai')} />;
-    if (!profile) return <LoadingProfile />;
-    return (
-      <PageWrapper
-        currentPage="rekap-nilai"
-        setPage={setPage}
-        user={user}
-        profile={profile}
-        logout={logout}
-      >
-        <RekapNilai onNavigate={setPage} />
-      </PageWrapper>
-    );
-  }
-
-  // === GUARD 8: Input Absensi (guru) ===
-  if (page === 'input-absensi') {
-    if (!user) return <Login onSuccess={() => setPage('input-absensi')} />;
-    if (!profile) return <LoadingProfile />;
-    return (
-      <PageWrapper
-        currentPage="input-absensi"
-        setPage={setPage}
-        user={user}
-        profile={profile}
-        logout={logout}
-      >
-        <InputAbsensi onNavigate={setPage} />
-      </PageWrapper>
-    );
-  }
-
-  // === GUARD 9: Jadwal Mengajar (guru) ===
-  if (page === 'jadwal-mengajar') {
-    if (!user) return <Login onSuccess={() => setPage('jadwal-mengajar')} />;
-    if (!profile) return <LoadingProfile />;
-    return (
-      <PageWrapper
-        currentPage="jadwal-mengajar"
-        setPage={setPage}
-        user={user}
-        profile={profile}
-        logout={logout}
-      >
-        <JadwalMengajar onNavigate={setPage} />
-      </PageWrapper>
-    );
-  }
-
-  // === GUARD 10: Daftar Siswa Guru (guru) ===
-  if (page === 'daftar-siswa-guru') {
-    if (!user) return <Login onSuccess={() => setPage('daftar-siswa-guru')} />;
-    if (!profile) return <LoadingProfile />;
-    return (
-      <PageWrapper
-        currentPage="daftar-siswa-guru"
-        setPage={setPage}
-        user={user}
-        profile={profile}
-        logout={logout}
-      >
-        <DaftarSiswaGuru onNavigate={setPage} />
-      </PageWrapper>
-    );
-  }
-
-  // === HALAMAN PUBLIK ===
+  // === HALAMAN PUBLIK UTAMA ===
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Header
@@ -208,13 +137,6 @@ function App() {
       />
       <main>
         {page === 'beranda' && <Beranda onNavigate={setPage} />}
-        {page === 'profil' && <Profil />}
-        {page === 'akademik' && <Akademik />}
-        {page === 'kesiswaan' && <Kesiswaan />}
-        {page === 'informasi' && <Informasi />}
-        {page === 'galeri' && <Galeri />}
-        {page === 'download' && <Download />}
-        {page === 'kontak' && <Kontak />}
       </main>
     </div>
   );
@@ -239,27 +161,14 @@ function PageWrapper({ currentPage, setPage, user, profile, logout, children }) 
 // === Helper: pilih dashboard berdasarkan role ===
 function renderDashboard(profile, setPage, user, logout) {
   const role = profile?.role?.toLowerCase();
-
   let DashboardComponent;
-  if (role === 'admin') {
-    DashboardComponent = DashboardAdmin;
-  } else if (role === 'guru') {
-    DashboardComponent = DashboardGuru;
-  } else if (role === 'siswa') {
-    DashboardComponent = DashboardSiswa;
-  } else {
-    DashboardComponent = DashboardSiswa;
-  }
+  if (role === 'admin') DashboardComponent = DashboardAdmin;
+  else if (role === 'guru') DashboardComponent = DashboardGuru;
+  else DashboardComponent = DashboardSiswa;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <Header
-        currentPage="dashboard"
-        onNavigate={setPage}
-        user={user}
-        profile={profile}
-        onLogout={logout}
-      />
+      <Header currentPage="dashboard" onNavigate={setPage} user={user} profile={profile} onLogout={logout} />
       <DashboardComponent onNavigate={setPage} />
     </div>
   );

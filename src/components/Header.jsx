@@ -1,4 +1,5 @@
 import { Menu, Search, BookOpen, Calendar, Users, ClipboardCheck, Award } from 'lucide-react';
+import { MENU_DATA } from '../data/menuData';
 
 const MENU_ITEMS = [
   { id: 'beranda', label: 'Beranda' },
@@ -21,6 +22,9 @@ const MENU_GURU = [
   { id: 'daftar-siswa-guru', label: 'Siswa', icon: Users },
 ];
 
+// Menu yang punya submenu (ada di MENU_DATA)
+const MENU_WITH_SUBMENU = ['profil', 'akademik', 'kesiswaan', 'informasi', 'galeri', 'download', 'kontak'];
+
 export default function Header({
   currentPage,
   onNavigate,
@@ -30,6 +34,25 @@ export default function Header({
 }) {
   const isGuru = profile?.role === 'guru';
   const menuAktif = isGuru ? MENU_GURU : MENU_ITEMS;
+
+  // Fungsi handle klik menu — kalau punya submenu, ke submenu pertama
+  function handleMenuClick(itemId) {
+    // Cek apakah item ini punya submenu di MENU_DATA
+    if (MENU_WITH_SUBMENU.includes(itemId) && MENU_DATA[itemId]?.submenus?.length > 0) {
+      const firstSubmenu = MENU_DATA[itemId].submenus[0].id;
+      onNavigate(`${itemId}-${firstSubmenu}`);
+    } else {
+      // Menu biasa (beranda) → langsung
+      onNavigate(itemId);
+    }
+  }
+
+  // Cek menu aktif — kalau currentPage = 'profil-tentang', yang aktif = 'profil'
+  function isMenuActive(itemId) {
+    if (currentPage === itemId) return true;
+    if (currentPage?.startsWith(`${itemId}-`)) return true;
+    return false;
+  }
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200">
@@ -56,12 +79,13 @@ export default function Header({
         <nav className="hidden xl:flex items-center gap-1">
           {menuAktif.map((item) => {
             const Icon = item.icon;
+            const active = isMenuActive(item.id);
             return (
               <button
                 key={item.id}
-                onClick={() => onNavigate(item.id)}
+                onClick={() => handleMenuClick(item.id)}
                 className={`px-3.5 py-2 rounded-full text-[13px] font-semibold transition-all flex items-center gap-1.5 ${
-                  currentPage === item.id
+                  active
                     ? 'bg-[#0F4C81] text-white shadow'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-[#0F4C81]'
                 }`}
