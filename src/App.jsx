@@ -127,6 +127,7 @@ function App() {
 function renderSubmenuContent(menuId, submenuId, submenuLabel) {
   if (menuId === 'profil') {
     if (submenuId === 'tentang') return <ProfilPages.Tentang />;
+    if (submenuId === 'sejarah') return <ProfilPages.Sejarah />;
   }
 
   return (
