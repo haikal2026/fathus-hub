@@ -18,6 +18,7 @@ import RekapNilai from './pages/RekapNilai';
 import SubmenuPlaceholder from './pages/SubmenuPlaceholder';
 import { MENU_DATA, getSubmenus } from './data/menuData';
 import * as ProfilPages from './pages/profilPages';
+import * as InformasiPages from './pages/informasiPages';
 
 function App() {
   const [page, setPage] = useState('beranda');
@@ -27,6 +28,10 @@ function App() {
     if (!user) setPage('beranda');
   }, [user]);
 
+  // ============================================
+  // PARSE HALAMAN SUBMENU
+  // 'profil-tentang' → { menuId: 'profil', submenuId: 'tentang' }
+  // ============================================
   function parseSubmenuPage(pageName) {
     const parts = pageName.split('-');
     if (parts.length < 2) return null;
@@ -46,17 +51,20 @@ function App() {
     return null;
   }
 
+  // === GUARD: LOGIN ===
   if (page === 'login') {
     if (user && profile) return renderDashboard(profile, setPage, user, logout);
     return <Login onSuccess={() => setPage('dashboard')} />;
   }
 
+  // === GUARD: DASHBOARD ===
   if (page === 'dashboard') {
     if (!user) return <Login onSuccess={() => setPage('dashboard')} />;
     if (!profile) return <LoadingProfile />;
     return renderDashboard(profile, setPage, user, logout);
   }
 
+  // === GUARD: KELOLA (ADMIN) ===
   if (['kelola-siswa', 'kelola-guru', 'kelola-pengumuman'].includes(page)) {
     if (!user) return <Login onSuccess={() => setPage(page)} />;
     if (!profile) return <LoadingProfile />;
@@ -72,6 +80,7 @@ function App() {
     );
   }
 
+  // === GUARD: PANEL GURU ===
   if (['input-nilai', 'rekap-nilai', 'input-absensi', 'jadwal-mengajar', 'daftar-siswa-guru'].includes(page)) {
     if (!user) return <Login onSuccess={() => setPage(page)} />;
     if (!profile) return <LoadingProfile />;
@@ -89,6 +98,7 @@ function App() {
     );
   }
 
+  // === SUBMENU PUBLIK ===
   const submenuMatch = parseSubmenuPage(page);
   if (submenuMatch) {
     const { menuId, submenuId, submenuLabel } = submenuMatch;
@@ -108,6 +118,7 @@ function App() {
     );
   }
 
+  // === HALAMAN PUBLIK UTAMA ===
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Header
@@ -124,7 +135,11 @@ function App() {
   );
 }
 
+// ============================================
+// HELPER: PILIH KONTEN SUBMENU
+// ============================================
 function renderSubmenuContent(menuId, submenuId, submenuLabel) {
+  // === PROFIL ===
   if (menuId === 'profil') {
     if (submenuId === 'tentang') return <ProfilPages.Tentang />;
     if (submenuId === 'sejarah') return <ProfilPages.Sejarah />;
@@ -135,6 +150,13 @@ function renderSubmenuContent(menuId, submenuId, submenuLabel) {
     if (submenuId === 'lingkungan') return <ProfilPages.Lingkungan />;
   }
 
+  // === INFORMASI ===
+  if (menuId === 'informasi') {
+    if (submenuId === 'pengumuman') return <InformasiPages.Pengumuman />;
+    if (submenuId === 'berita') return <InformasiPages.Berita />;
+  }
+
+  // === FALLBACK: Placeholder ===
   return (
     <SubmenuPlaceholder
       menuId={menuId}
@@ -144,6 +166,9 @@ function renderSubmenuContent(menuId, submenuId, submenuLabel) {
   );
 }
 
+// ============================================
+// HELPER: WRAPPER DENGAN HEADER
+// ============================================
 function PageWrapper({ currentPage, setPage, user, profile, logout, children }) {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -159,6 +184,9 @@ function PageWrapper({ currentPage, setPage, user, profile, logout, children }) 
   );
 }
 
+// ============================================
+// HELPER: PILIH DASHBOARD BERDASARKAN ROLE
+// ============================================
 function renderDashboard(profile, setPage, user, logout) {
   const role = profile?.role?.toLowerCase();
   let DashboardComponent;
@@ -180,6 +208,9 @@ function renderDashboard(profile, setPage, user, logout) {
   );
 }
 
+// ============================================
+// HELPER: LOADING STATE
+// ============================================
 function LoadingProfile() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
