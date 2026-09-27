@@ -131,6 +131,8 @@ function renderSubmenuContent(menuId, submenuId, submenuLabel) {
     if (submenuId === 'visi') return <ProfilPages.VisiMisi />;
     if (submenuId === 'guru') return <ProfilPages.DataGuru />;
     if (submenuId === 'siswa') return <ProfilPages.DataSiswa />;
+    if (submenuId === 'fasilitas') return <ProfilPages.Fasilitas />;
+    if (submenuId === 'lingkungan') return <ProfilPages.Lingkungan />;
   }
 
   return (
