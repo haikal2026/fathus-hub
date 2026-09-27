@@ -3,13 +3,6 @@ import { useAuth } from './context/AuthContext';
 import Header from './components/Header';
 import MenuLayout from './components/MenuLayout';
 import Beranda from './pages/Beranda';
-import Profil from './pages/Profil';
-import Akademik from './pages/Akademik';
-import Kesiswaan from './pages/Kesiswaan';
-import Informasi from './pages/Informasi';
-import Galeri from './pages/Galeri';
-import Download from './pages/Download';
-import Kontak from './pages/Kontak';
 import Login from './pages/Login';
 import DashboardAdmin from './pages/DashboardAdmin';
 import DashboardGuru from './pages/DashboardGuru';
@@ -24,6 +17,7 @@ import DaftarSiswaGuru from './pages/DaftarSiswaGuru';
 import RekapNilai from './pages/RekapNilai';
 import SubmenuPlaceholder from './pages/SubmenuPlaceholder';
 import { MENU_DATA, getSubmenus } from './data/menuData';
+import * as ProfilPages from './pages/profilPages';
 
 function App() {
   const [page, setPage] = useState('beranda');
@@ -33,10 +27,6 @@ function App() {
     if (!user) setPage('beranda');
   }, [user]);
 
-  // ============================================
-  // CEK APAKAH PAGE ADALAH SUBMENU
-  // 'profil-tentang' → { menuId: 'profil', submenuId: 'tentang' }
-  // ============================================
   function parseSubmenuPage(pageName) {
     const parts = pageName.split('-');
     if (parts.length < 2) return null;
@@ -56,20 +46,17 @@ function App() {
     return null;
   }
 
-  // === GUARD 1: LOGIN ===
   if (page === 'login') {
     if (user && profile) return renderDashboard(profile, setPage, user, logout);
     return <Login onSuccess={() => setPage('dashboard')} />;
   }
 
-  // === GUARD 2: DASHBOARD ===
   if (page === 'dashboard') {
     if (!user) return <Login onSuccess={() => setPage('dashboard')} />;
     if (!profile) return <LoadingProfile />;
     return renderDashboard(profile, setPage, user, logout);
   }
 
-  // === GUARD 3-5: KELOLA (ADMIN) ===
   if (['kelola-siswa', 'kelola-guru', 'kelola-pengumuman'].includes(page)) {
     if (!user) return <Login onSuccess={() => setPage(page)} />;
     if (!profile) return <LoadingProfile />;
@@ -85,7 +72,6 @@ function App() {
     );
   }
 
-  // === GUARD 6-10: PANEL GURU ===
   if (['input-nilai', 'rekap-nilai', 'input-absensi', 'jadwal-mengajar', 'daftar-siswa-guru'].includes(page)) {
     if (!user) return <Login onSuccess={() => setPage(page)} />;
     if (!profile) return <LoadingProfile />;
@@ -103,10 +89,11 @@ function App() {
     );
   }
 
-  // === SUBMENU PUBLIK (FASE 3 BARU) ===
   const submenuMatch = parseSubmenuPage(page);
   if (submenuMatch) {
     const { menuId, submenuId, submenuLabel } = submenuMatch;
+    const Content = renderSubmenuContent(menuId, submenuId, submenuLabel);
+
     return (
       <MenuLayout
         menuId={menuId}
@@ -116,16 +103,11 @@ function App() {
         profile={profile}
         onLogout={logout}
       >
-        <SubmenuPlaceholder
-          menuId={menuId}
-          submenuId={submenuId}
-          submenuLabel={submenuLabel}
-        />
+        {Content}
       </MenuLayout>
     );
   }
 
-  // === HALAMAN PUBLIK UTAMA ===
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Header
@@ -142,7 +124,20 @@ function App() {
   );
 }
 
-// === Helper: wrapper dengan Header ===
+function renderSubmenuContent(menuId, submenuId, submenuLabel) {
+  if (menuId === 'profil') {
+    if (submenuId === 'tentang') return <ProfilPages.Tentang />;
+  }
+
+  return (
+    <SubmenuPlaceholder
+      menuId={menuId}
+      submenuId={submenuId}
+      submenuLabel={submenuLabel}
+    />
+  );
+}
+
 function PageWrapper({ currentPage, setPage, user, profile, logout, children }) {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -158,7 +153,6 @@ function PageWrapper({ currentPage, setPage, user, profile, logout, children }) 
   );
 }
 
-// === Helper: pilih dashboard berdasarkan role ===
 function renderDashboard(profile, setPage, user, logout) {
   const role = profile?.role?.toLowerCase();
   let DashboardComponent;
@@ -168,13 +162,18 @@ function renderDashboard(profile, setPage, user, logout) {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <Header currentPage="dashboard" onNavigate={setPage} user={user} profile={profile} onLogout={logout} />
+      <Header
+        currentPage="dashboard"
+        onNavigate={setPage}
+        user={user}
+        profile={profile}
+        onLogout={logout}
+      />
       <DashboardComponent onNavigate={setPage} />
     </div>
   );
 }
 
-// === Helper: loading state ===
 function LoadingProfile() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">

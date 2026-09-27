@@ -12,7 +12,6 @@ const MENU_ITEMS = [
   { id: 'kontak', label: 'Kontak' },
 ];
 
-// Menu khusus guru
 const MENU_GURU = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'input-nilai', label: 'Input Nilai', icon: BookOpen },
@@ -22,7 +21,6 @@ const MENU_GURU = [
   { id: 'daftar-siswa-guru', label: 'Siswa', icon: Users },
 ];
 
-// Menu yang punya submenu (ada di MENU_DATA)
 const MENU_WITH_SUBMENU = ['profil', 'akademik', 'kesiswaan', 'informasi', 'galeri', 'download', 'kontak'];
 
 export default function Header({
@@ -35,19 +33,15 @@ export default function Header({
   const isGuru = profile?.role === 'guru';
   const menuAktif = isGuru ? MENU_GURU : MENU_ITEMS;
 
-  // Fungsi handle klik menu — kalau punya submenu, ke submenu pertama
   function handleMenuClick(itemId) {
-    // Cek apakah item ini punya submenu di MENU_DATA
     if (MENU_WITH_SUBMENU.includes(itemId) && MENU_DATA[itemId]?.submenus?.length > 0) {
       const firstSubmenu = MENU_DATA[itemId].submenus[0].id;
       onNavigate(`${itemId}-${firstSubmenu}`);
     } else {
-      // Menu biasa (beranda) → langsung
       onNavigate(itemId);
     }
   }
 
-  // Cek menu aktif — kalau currentPage = 'profil-tentang', yang aktif = 'profil'
   function isMenuActive(itemId) {
     if (currentPage === itemId) return true;
     if (currentPage?.startsWith(`${itemId}-`)) return true;
@@ -57,7 +51,6 @@ export default function Header({
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200">
       <div className="mx-auto max-w-[1400px] px-4 lg:px-6 h-16 flex items-center justify-between gap-4">
-        {/* Logo */}
         <button
           onClick={() => onNavigate('beranda')}
           className="flex items-center gap-3 shrink-0"
@@ -75,7 +68,6 @@ export default function Header({
           </div>
         </button>
 
-        {/* Menu */}
         <nav className="hidden xl:flex items-center gap-1">
           {menuAktif.map((item) => {
             const Icon = item.icon;
@@ -97,7 +89,6 @@ export default function Header({
           })}
         </nav>
 
-        {/* Search + Auth */}
         <div className="flex items-center gap-2">
           <div className="hidden md:flex items-center bg-slate-50 border border-slate-200 rounded-full px-3 h-9 w-[180px]">
             <Search className="w-4 h-4 text-slate-400" />
@@ -107,7 +98,6 @@ export default function Header({
             />
           </div>
 
-          {/* User Login */}
           {user && profile ? (
             <div className="flex items-center gap-2">
               <button

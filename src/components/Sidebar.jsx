@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { MENU_DATA, getSubmenus, getMenuLabel } from '../data/menuData';
 
-// Map icon name (string) → component
 const ICON_MAP = {
   Building2,
   BookOpen,
@@ -24,11 +23,11 @@ const ICON_MAP = {
 };
 
 export default function Sidebar({
-  menuId,          // contoh: 'profil'
-  submenuId,       // contoh: 'tentang' (submenu aktif)
-  onNavigate,      // fungsi navigasi ke submenu
-  isMobileOpen,    // untuk mobile drawer
-  onClose,         // tutup drawer di mobile
+  menuId,
+  submenuId,
+  onNavigate,
+  isMobileOpen,
+  onClose,
 }) {
   const menu = MENU_DATA[menuId];
   if (!menu) return null;
@@ -47,7 +46,6 @@ export default function Sidebar({
       `}
     >
       <div className="p-5">
-        {/* === HEADER MENU === */}
         <div className="flex items-center gap-2 mb-5">
           <div className="w-8 h-8 rounded-lg bg-[#FBBF24] flex items-center justify-center">
             <Icon className="w-4 h-4 text-[#0F4C81]" />
@@ -62,7 +60,6 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* === DAFTAR SUBMENU === */}
         <div className="space-y-1">
           {submenus.map((sub) => {
             const isActive = submenuId === sub.id;
@@ -90,7 +87,6 @@ export default function Sidebar({
           })}
         </div>
 
-        {/* === INFO BOX === */}
         <div className="mt-6 p-4 rounded-2xl bg-[#0F4C81] text-white">
           <div className="text-[12px] font-bold">FATHUS School Hub</div>
           <div className="text-[11px] opacity-80 mt-1 leading-relaxed">

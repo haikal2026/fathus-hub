@@ -1,0 +1,1 @@
+export { default as Tentang } from './Tentang';
