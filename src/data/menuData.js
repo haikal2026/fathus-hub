@@ -1,7 +1,6 @@
 // ============================================================
 // Struktur Submenu FATHUS School Hub
 // Setiap menu utama punya submenu sendiri
-// Kalau mau tambah/hapus submenu, cukup edit di file ini
 // ============================================================
 
 export const MENU_DATA = {
@@ -22,14 +21,10 @@ export const MENU_DATA = {
     label: 'Akademik',
     icon: 'BookOpen',
     submenus: [
-      { id: 'dashboard', label: 'Dashboard Akademik' },
+     { id: 'dashboard', label: 'Dashboard Akademik' },
       { id: 'jadwal', label: 'Jadwal Pelajaran' },
       { id: 'mapel', label: 'Mata Pelajaran' },
-      { id: 'guru', label: 'Guru Pengajar' },
       { id: 'ujian', label: 'Jadwal Ujian' },
-      { id: 'kalender', label: 'Kalender Akademik' },
-      { id: 'materi', label: 'Materi Pembelajaran' },
-      { id: 'nilai', label: 'Informasi Nilai' },
     ],
   },
   kesiswaan: {
@@ -43,20 +38,6 @@ export const MENU_DATA = {
       { id: 'prestasi', label: 'Prestasi' },
     ],
   },
-  perpus: {
-    label: 'Perpustakaan',
-    icon: 'Library',
-    submenus: [
-      { id: 'beranda', label: 'Beranda Perpus' },
-      { id: 'pelajaran', label: 'Buku Pelajaran' },
-      { id: 'umum', label: 'Buku Umum' },
-      { id: 'modul', label: 'Modul' },
-      { id: 'ebook', label: 'E-Book' },
-      { id: 'materi', label: 'Materi Ajar' },
-      { id: 'favorit', label: 'Favorit' },
-      { id: 'riwayat', label: 'Riwayat Baca' },
-    ],
-  },
   informasi: {
     label: 'Informasi',
     icon: 'Megaphone',
@@ -65,9 +46,6 @@ export const MENU_DATA = {
       { id: 'berita', label: 'Berita Sekolah' },
       { id: 'agenda', label: 'Agenda' },
       { id: 'kalender', label: 'Kalender Kegiatan' },
-      { id: 'siswa', label: 'Info Siswa' },
-      { id: 'guru', label: 'Info Guru' },
-      { id: 'ortu', label: 'Info Orang Tua' },
     ],
   },
   galeri: {

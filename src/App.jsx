@@ -19,6 +19,7 @@ import SubmenuPlaceholder from './pages/SubmenuPlaceholder';
 import { MENU_DATA, getSubmenus } from './data/menuData';
 import * as ProfilPages from './pages/profilPages';
 import * as InformasiPages from './pages/informasiPages';
+import * as AkademikPages from './pages/akademikPages';
 
 function App() {
   const [page, setPage] = useState('beranda');
@@ -154,6 +155,13 @@ function renderSubmenuContent(menuId, submenuId, submenuLabel) {
   if (menuId === 'informasi') {
     if (submenuId === 'pengumuman') return <InformasiPages.Pengumuman />;
     if (submenuId === 'berita') return <InformasiPages.Berita />;
+    if (submenuId === 'agenda') return <InformasiPages.Agenda />;
+    if (submenuId === 'kalender') return <InformasiPages.Kalender />;
+  }
+
+  // === AKADEMIK ===
+  if (menuId === 'akademik') {
+    if (submenuId === 'dashboard') return <AkademikPages.Dashboard />;
   }
 
   // === FALLBACK: Placeholder ===
