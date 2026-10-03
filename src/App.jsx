@@ -159,9 +159,12 @@ function renderSubmenuContent(menuId, submenuId, submenuLabel) {
     if (submenuId === 'kalender') return <InformasiPages.Kalender />;
   }
 
-  // === AKADEMIK ===
+    // === AKADEMIK ===
   if (menuId === 'akademik') {
     if (submenuId === 'dashboard') return <AkademikPages.Dashboard />;
+    if (submenuId === 'jadwal') return <AkademikPages.JadwalPelajaran />;
+    if (submenuId === 'mapel') return <AkademikPages.MataPelajaran />;
+    if (submenuId === 'ujian') return <AkademikPages.JadwalUjian />;
   }
 
   // === FALLBACK: Placeholder ===
