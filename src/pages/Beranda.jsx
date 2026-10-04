@@ -384,19 +384,19 @@ export default function Beranda({ onNavigate }) {
             </div>
           </div>
 
-          <div className="bg-[#0F4C81] rounded-[20px] p-5 text-white">
-            <div className="text-[13px] font-bold">⚡ Akses Cepat</div>
-            <div className="grid grid-cols-4 gap-2 mt-3">
-              {[
-                { id: 'akademik', emoji: '📚', label: 'Jadwal' },
-                { id: 'kesiswaan', emoji: '👥', label: 'Siswa' },
-                { id: 'galeri', emoji: '📸', label: 'Galeri' },
-                { id: 'informasi', emoji: '📢', label: 'Info' },
-                { id: 'download', emoji: '📥', label: 'File' },
-                { id: 'profil', emoji: '🏫', label: 'Profil' },
-                { id: 'kontak', emoji: '📞', label: 'Kontak' },
-              ].map((item) => (
-                <button
+         <div className="bg-[#0F4C81] rounded-[20px] p-5 text-white">
+  <div className="text-[13px] font-bold">⚡ Akses Cepat</div>
+  <div className="grid grid-cols-4 gap-2 mt-3">
+   {[
+  { id: 'akademik-jadwal', emoji: '📅', label: 'Jadwal' },
+  { id: 'galeri', emoji: '📸', label: 'Galeri' },
+  { id: 'kesiswaan-prestasi', emoji: '🏆', label: 'Prestasi' },
+  { id: 'informasi-pengumuman', emoji: '📢', label: 'Info' },
+  { id: 'download', emoji: '📥', label: 'File' },
+  { id: 'profil-tentang', emoji: '🏫', label: 'Profil' },
+  { id: 'kontak', emoji: '📞', label: 'Kontak' },
+].map((item) => (
+   <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
                   className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 transition"

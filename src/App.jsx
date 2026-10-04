@@ -35,12 +35,26 @@ function App() {
 
   // ============================================
   // PARSE HALAMAN SUBMENU
-  // 'profil-tentang' → { menuId: 'profil', submenuId: 'tentang' }
   // ============================================
   function parseSubmenuPage(pageName) {
     const parts = pageName.split('-');
-    if (parts.length < 2) return null;
 
+    // Menu tanpa submenu (misal 'galeri', 'download', 'kontak')
+    if (parts.length === 1) {
+      if (MENU_DATA[pageName]) {
+        const submenus = getSubmenus(pageName);
+        if (submenus.length > 0) {
+          return {
+            menuId: pageName,
+            submenuId: submenus[0].id,
+            submenuLabel: submenus[0].label,
+          };
+        }
+      }
+      return null;
+    }
+
+    // Menu dengan submenu (misal 'profil-tentang', 'akademik-jadwal')
     for (let i = parts.length - 1; i >= 1; i--) {
       const menuId = parts.slice(0, i).join('-');
       const submenuId = parts.slice(i).join('-');
@@ -69,17 +83,17 @@ function App() {
     return renderDashboard(profile, setPage, user, logout);
   }
 
-    // === GUARD: KELOLA (ADMIN) ===
+  // === GUARD: KELOLA (ADMIN) ===
   if (['kelola-siswa', 'kelola-guru', 'kelola-pengumuman', 'kelola-galeri'].includes(page)) {
     if (!user) return <Login onSuccess={() => setPage(page)} />;
     if (!profile) return <LoadingProfile />;
 
-        const Content =
+    const Content =
       page === 'kelola-siswa' ? KelolaSiswa :
       page === 'kelola-guru' ? KelolaGuru :
       page === 'kelola-galeri' ? GaleriPages.KelolaGaleri :
       KelolaPengumuman;
-      
+
     return (
       <PageWrapper currentPage={page} setPage={setPage} user={user} profile={profile} logout={logout}>
         <Content onNavigate={setPage} />
@@ -125,7 +139,7 @@ function App() {
     );
   }
 
-  // === HALAMAN PUBLIK UTAMA ===
+  // === HALAMAN PUBLIK UTAMA (BERANDA) ===
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Header
@@ -165,7 +179,7 @@ function renderSubmenuContent(menuId, submenuId, submenuLabel, onNavigate) {
     if (submenuId === 'kalender') return <InformasiPages.Kalender />;
   }
 
-      // === AKADEMIK ===
+  // === AKADEMIK ===
   if (menuId === 'akademik') {
     if (submenuId === 'dashboard') return <AkademikPages.Dashboard onNavigate={onNavigate} />;
     if (submenuId === 'jadwal') return <AkademikPages.JadwalPelajaran />;
@@ -173,29 +187,29 @@ function renderSubmenuContent(menuId, submenuId, submenuLabel, onNavigate) {
     if (submenuId === 'ujian') return <AkademikPages.JadwalUjian />;
   }
 
-    // === GALERI ===
+  // === GALERI ===
   if (menuId === 'galeri') {
     return <GaleriPages.Galeri submenuId={submenuId} />;
   }
 
-      // === DOWNLOAD ===
+  // === DOWNLOAD ===
   if (menuId === 'download') {
     return <DownloadPages.Download submenuId={submenuId} />;
   }
 
-    // === KONTAK ===
+  // === KONTAK ===
   if (menuId === 'kontak') {
     return <KontakPages.Kontak submenuId={submenuId} />;
   }
 
-    // === KESISWAAN ===
+  // === KESISWAAN ===
   if (menuId === 'kesiswaan') {
     if (submenuId === 'prestasi') return <KesiswaanPages.Prestasi />;
     if (submenuId === 'ekskul') return <KesiswaanPages.Ekstrakurikuler />;
     if (submenuId === 'organisasi') return <KesiswaanPages.Organisasi />;
   }
-  
-  // === FALLBACK: Placeholder ===
+
+  // === FALLBACK ===
   return (
     <SubmenuPlaceholder
       menuId={menuId}
