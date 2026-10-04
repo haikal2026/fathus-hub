@@ -27,17 +27,15 @@ export const MENU_DATA = {
       { id: 'ujian', label: 'Jadwal Ujian' },
     ],
   },
-  kesiswaan: {
-    label: 'Kesiswaan',
-    icon: 'Users',
-    submenus: [
-      { id: 'data', label: 'Data Siswa' },
-      { id: 'absensi', label: 'Absensi Digital' },
-      { id: 'organisasi', label: 'Organisasi' },
-      { id: 'ekskul', label: 'Ekstrakurikuler' },
-      { id: 'prestasi', label: 'Prestasi' },
-    ],
-  },
+ kesiswaan: {
+  label: 'Kesiswaan',
+  icon: 'Users',
+  submenus: [
+    { id: 'prestasi', label: 'Prestasi' },
+    { id: 'ekskul', label: 'Ekstrakurikuler' },
+    { id: 'organisasi', label: 'Organisasi' },
+  ],
+},
   informasi: {
     label: 'Informasi',
     icon: 'Megaphone',

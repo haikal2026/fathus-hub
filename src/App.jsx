@@ -23,6 +23,7 @@ import * as AkademikPages from './pages/akademikPages';
 import * as GaleriPages from './pages/galeriPages';
 import * as DownloadPages from './pages/downloadPages';
 import * as KontakPages from './pages/kontakPages';
+import * as KesiswaanPages from './pages/kesiswaanPages';
 
 function App() {
   const [page, setPage] = useState('beranda');
@@ -185,6 +186,13 @@ function renderSubmenuContent(menuId, submenuId, submenuLabel, onNavigate) {
     // === KONTAK ===
   if (menuId === 'kontak') {
     return <KontakPages.Kontak submenuId={submenuId} />;
+  }
+
+    // === KESISWAAN ===
+  if (menuId === 'kesiswaan') {
+    if (submenuId === 'prestasi') return <KesiswaanPages.Prestasi />;
+    if (submenuId === 'ekskul') return <KesiswaanPages.Ekstrakurikuler />;
+    if (submenuId === 'organisasi') return <KesiswaanPages.Organisasi />;
   }
   
   // === FALLBACK: Placeholder ===
