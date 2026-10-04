@@ -22,6 +22,7 @@ import * as InformasiPages from './pages/informasiPages';
 import * as AkademikPages from './pages/akademikPages';
 import * as GaleriPages from './pages/galeriPages';
 import * as DownloadPages from './pages/downloadPages';
+import * as KontakPages from './pages/kontakPages';
 
 function App() {
   const [page, setPage] = useState('beranda');
@@ -181,6 +182,11 @@ function renderSubmenuContent(menuId, submenuId, submenuLabel, onNavigate) {
     return <DownloadPages.Download submenuId={submenuId} />;
   }
 
+    // === KONTAK ===
+  if (menuId === 'kontak') {
+    return <KontakPages.Kontak submenuId={submenuId} />;
+  }
+  
   // === FALLBACK: Placeholder ===
   return (
     <SubmenuPlaceholder
