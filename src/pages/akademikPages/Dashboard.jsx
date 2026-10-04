@@ -11,7 +11,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-export default function Dashboard() {
+export default function Dashboard({ onNavigate }) {
   // Statistik akademik
   const stats = [
     {
@@ -89,25 +89,30 @@ export default function Dashboard() {
     },
   ];
 
-  // Akses cepat (3 kartu)
+  // ============================================
+  // AKSES CEPAT — dengan target halaman
+  // ============================================
   const quickAccess = [
     {
       icon: Calendar,
       label: 'Jadwal Pelajaran',
       desc: 'Jadwal harian kelas X, XI, dan XII',
       warna: 'from-blue-600 to-blue-800',
+      target: 'akademik-jadwal',
     },
     {
       icon: BookOpen,
       label: 'Mata Pelajaran',
       desc: 'Daftar mapel per rumpun keilmuan',
       warna: 'from-emerald-500 to-emerald-700',
+      target: 'akademik-mapel',
     },
     {
       icon: Award,
       label: 'Jadwal Ujian',
       desc: 'Info UTS, UAS & ujian madrasah',
       warna: 'from-amber-500 to-orange-600',
+      target: 'akademik-ujian',
     },
   ];
 
@@ -118,6 +123,11 @@ export default function Dashboard() {
     'Jam pelajaran: 07.00 - 12.00 WIB',
     'Guru piket mendampingi shalat dhuhur berjamaah',
   ];
+
+  // Handler klik akses cepat
+  const handleQuickAccess = (target) => {
+    if (onNavigate) onNavigate(target);
+  };
 
   return (
     <div className="p-6 lg:p-10">
@@ -159,12 +169,12 @@ export default function Dashboard() {
         </div>
 
         {/* ==========================================
-            AKSES CEPAT — BESAR & BERWARNA
+            AKSES CEPAT — BISA DIKLIK
         ========================================== */}
         <div>
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-lg bg-[#FBBF24] flex items-center justify-center">
-              <TrendingUp className="w-4.5 h-4.5 text-[#0F4C81]" />
+              <TrendingUp className="w-4 h-4 text-[#0F4C81]" />
             </div>
             <div>
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
@@ -182,7 +192,8 @@ export default function Dashboard() {
               return (
                 <button
                   key={idx}
-                  className={`group relative overflow-hidden rounded-[20px] bg-gradient-to-br ${q.warna} text-white p-6 text-left hover:shadow-2xl transition-all hover:scale-[1.02] min-h-[180px] flex flex-col justify-between`}
+                  onClick={() => handleQuickAccess(q.target)}
+                  className={`group relative overflow-hidden rounded-[20px] bg-gradient-to-br ${q.warna} text-white p-6 text-left hover:shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] min-h-[180px] flex flex-col justify-between cursor-pointer`}
                 >
                   {/* Pattern dekoratif */}
                   <div
@@ -219,7 +230,7 @@ export default function Dashboard() {
           </div>
 
           <p className="text-[11px] text-slate-400 mt-3 text-center italic">
-            💡 Klik menu di sidebar kiri untuk membuka halaman lengkap
+            💡 Klik salah satu kartu untuk membuka halaman lengkap
           </p>
         </div>
 

@@ -20,6 +20,7 @@ import { MENU_DATA, getSubmenus } from './data/menuData';
 import * as ProfilPages from './pages/profilPages';
 import * as InformasiPages from './pages/informasiPages';
 import * as AkademikPages from './pages/akademikPages';
+import * as GaleriPages from './pages/galeriPages';
 
 function App() {
   const [page, setPage] = useState('beranda');
@@ -65,15 +66,17 @@ function App() {
     return renderDashboard(profile, setPage, user, logout);
   }
 
-  // === GUARD: KELOLA (ADMIN) ===
-  if (['kelola-siswa', 'kelola-guru', 'kelola-pengumuman'].includes(page)) {
+    // === GUARD: KELOLA (ADMIN) ===
+  if (['kelola-siswa', 'kelola-guru', 'kelola-pengumuman', 'kelola-galeri'].includes(page)) {
     if (!user) return <Login onSuccess={() => setPage(page)} />;
     if (!profile) return <LoadingProfile />;
 
-    const Content =
+        const Content =
       page === 'kelola-siswa' ? KelolaSiswa :
-      page === 'kelola-guru' ? KelolaGuru : KelolaPengumuman;
-
+      page === 'kelola-guru' ? KelolaGuru :
+      page === 'kelola-galeri' ? GaleriPages.KelolaGaleri :
+      KelolaPengumuman;
+      
     return (
       <PageWrapper currentPage={page} setPage={setPage} user={user} profile={profile} logout={logout}>
         <Content onNavigate={setPage} />
@@ -103,7 +106,7 @@ function App() {
   const submenuMatch = parseSubmenuPage(page);
   if (submenuMatch) {
     const { menuId, submenuId, submenuLabel } = submenuMatch;
-    const Content = renderSubmenuContent(menuId, submenuId, submenuLabel);
+    const Content = renderSubmenuContent(menuId, submenuId, submenuLabel, setPage);
 
     return (
       <MenuLayout
@@ -139,7 +142,7 @@ function App() {
 // ============================================
 // HELPER: PILIH KONTEN SUBMENU
 // ============================================
-function renderSubmenuContent(menuId, submenuId, submenuLabel) {
+function renderSubmenuContent(menuId, submenuId, submenuLabel, onNavigate) {
   // === PROFIL ===
   if (menuId === 'profil') {
     if (submenuId === 'tentang') return <ProfilPages.Tentang />;
@@ -159,12 +162,17 @@ function renderSubmenuContent(menuId, submenuId, submenuLabel) {
     if (submenuId === 'kalender') return <InformasiPages.Kalender />;
   }
 
-    // === AKADEMIK ===
+      // === AKADEMIK ===
   if (menuId === 'akademik') {
-    if (submenuId === 'dashboard') return <AkademikPages.Dashboard />;
+    if (submenuId === 'dashboard') return <AkademikPages.Dashboard onNavigate={onNavigate} />;
     if (submenuId === 'jadwal') return <AkademikPages.JadwalPelajaran />;
     if (submenuId === 'mapel') return <AkademikPages.MataPelajaran />;
     if (submenuId === 'ujian') return <AkademikPages.JadwalUjian />;
+  }
+
+    // === GALERI ===
+  if (menuId === 'galeri') {
+    return <GaleriPages.Galeri />;
   }
 
   // === FALLBACK: Placeholder ===
