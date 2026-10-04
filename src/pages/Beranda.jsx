@@ -389,7 +389,6 @@ export default function Beranda({ onNavigate }) {
             <div className="grid grid-cols-4 gap-2 mt-3">
               {[
                 { id: 'akademik', emoji: '📚', label: 'Jadwal' },
-                { id: 'perpus', emoji: '📖', label: 'Perpus' },
                 { id: 'kesiswaan', emoji: '👥', label: 'Siswa' },
                 { id: 'galeri', emoji: '📸', label: 'Galeri' },
                 { id: 'informasi', emoji: '📢', label: 'Info' },
