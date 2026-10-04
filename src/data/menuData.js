@@ -65,17 +65,15 @@ export const MENU_DATA = {
     ],
   },
   download: {
-    label: 'Download',
-    icon: 'FileDown',
-    submenus: [
-      { id: 'semua', label: 'Semua Dokumen' },
-      { id: 'formulir', label: 'Formulir' },
-      { id: 'kalender', label: 'Kalender Akademik' },
-      { id: 'panduan', label: 'Panduan Siswa' },
-      { id: 'tatib', label: 'Tata Tertib' },
-      { id: 'materi', label: 'Materi Pembelajaran' },
-    ],
-  },
+  label: 'Download',
+  icon: 'FileDown',
+  submenus: [
+    { id: 'semua', label: 'Semua Dokumen' },
+    { id: 'formulir', label: 'Formulir' },
+    { id: 'kalender', label: 'Kalender Akademik' },
+    { id: 'tatib', label: 'Tata Tertib' },
+  ],
+},
   kontak: {
     label: 'Kontak',
     icon: 'Phone',

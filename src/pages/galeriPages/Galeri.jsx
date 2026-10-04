@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Camera,
   X,
@@ -22,11 +22,15 @@ const KATEGORI_GALERI = [
   { id: 'wisuda', label: 'Wisuda' },
 ];
 
-export default function Galeri() {
+export default function Galeri({ submenuId }) {
   const { list, loading, error } = useGaleri();
-  const [kategori, setKategori] = useState('semua');
+  const [kategori, setKategori] = useState(submenuId || 'semua');
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
+  // Sync kategori saat submenuId berubah (klik submenu di sidebar)
+  useEffect(() => {
+    if (submenuId) setKategori(submenuId);
+  }, [submenuId]);
   const fotoFiltered = useMemo(
     () => filterByKategori(list, kategori),
     [list, kategori]

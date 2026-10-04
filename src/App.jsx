@@ -21,6 +21,7 @@ import * as ProfilPages from './pages/profilPages';
 import * as InformasiPages from './pages/informasiPages';
 import * as AkademikPages from './pages/akademikPages';
 import * as GaleriPages from './pages/galeriPages';
+import * as DownloadPages from './pages/downloadPages';
 
 function App() {
   const [page, setPage] = useState('beranda');
@@ -172,7 +173,12 @@ function renderSubmenuContent(menuId, submenuId, submenuLabel, onNavigate) {
 
     // === GALERI ===
   if (menuId === 'galeri') {
-    return <GaleriPages.Galeri />;
+    return <GaleriPages.Galeri submenuId={submenuId} />;
+  }
+
+      // === DOWNLOAD ===
+  if (menuId === 'download') {
+    return <DownloadPages.Download submenuId={submenuId} />;
   }
 
   // === FALLBACK: Placeholder ===
